@@ -7,6 +7,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // =====================================================
+// TRUST PROXY - RENDER
+// =====================================================
+
+app.set("trust proxy", 1);
+
+// =====================================================
 // POSTGRESQL
 // =====================================================
 
@@ -29,11 +35,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "world-football-forum-secret",
+        secret:
+            process.env.SESSION_SECRET ||
+            "world-football-forum-secret",
+
         resave: false,
+
         saveUninitialized: false,
+
         cookie: {
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
             httpOnly: true,
             maxAge: 1000 * 60 * 60 * 24 * 7
         }
@@ -69,7 +80,9 @@ const VALID_CATEGORIES = [
 async function initDatabase() {
 
     if (!process.env.DATABASE_URL) {
-        console.log("Database belum terhubung. DATABASE_URL tidak ditemukan.");
+        console.log(
+            "Database belum terhubung. DATABASE_URL tidak ditemukan."
+        );
         return;
     }
 
@@ -98,7 +111,9 @@ async function initDatabase() {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS comments (
                 id BIGSERIAL PRIMARY KEY,
-                thread_id BIGINT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+                thread_id BIGINT NOT NULL
+                    REFERENCES threads(id)
+                    ON DELETE CASCADE,
                 author VARCHAR(100) NOT NULL,
                 text TEXT NOT NULL,
                 date TEXT NOT NULL
@@ -120,7 +135,8 @@ async function initDatabase() {
 
             await pool.query(
                 `
-                INSERT INTO users (id, username, password)
+                INSERT INTO users
+                (id, username, password)
                 VALUES ($1, $2, $3)
                 `,
                 [
@@ -130,17 +146,24 @@ async function initDatabase() {
                 ]
             );
 
-            console.log("User lama dodo berhasil dimasukkan ke PostgreSQL.");
+            console.log(
+                "User lama dodo berhasil dimasukkan ke PostgreSQL."
+            );
 
         } else {
 
-            console.log("User dodo sudah ada di PostgreSQL.");
+            console.log(
+                "User dodo sudah ada di PostgreSQL."
+            );
 
         }
 
     } catch (error) {
 
-        console.error("DATABASE ERROR:", error);
+        console.error(
+            "DATABASE ERROR:",
+            error
+        );
 
     }
 }
@@ -159,18 +182,29 @@ app.get("/", async (req, res) => {
         );
 
         const result = await pool.query(`
-            SELECT
-                id,
-                title,
-                content,
-                category,
-                author,
-                date,
-                views
-            FROM threads
-            ORDER BY id DESC
-            LIMIT 10
-        `);
+    SELECT
+        t.id,
+        t.title,
+        t.content,
+        t.category,
+        t.author,
+        t.date,
+        t.views,
+        COUNT(c.id)::INTEGER AS comment_count
+    FROM threads t
+    LEFT JOIN comments c
+        ON c.thread_id = t.id
+    GROUP BY
+        t.id,
+        t.title,
+        t.content,
+        t.category,
+        t.author,
+        t.date,
+        t.views
+    ORDER BY t.id DESC
+    LIMIT 10
+`);
 
         const threads = result.rows;
 
@@ -181,7 +215,10 @@ app.get("/", async (req, res) => {
 
     } catch (error) {
 
-        console.error("HOME ERROR:", error);
+        console.error(
+            "HOME ERROR:",
+            error
+        );
 
         res.status(500).send(
             "Terjadi kesalahan pada database."
@@ -210,22 +247,30 @@ app.get("/category/:name", async (req, res) => {
 
         }
 
-        const result = await pool.query(
-            `
-            SELECT
-                id,
-                title,
-                content,
-                category,
-                author,
-                date,
-                views
-            FROM threads
-            WHERE category = $1
-            ORDER BY id DESC
-            `,
-            [categoryName]
-        );
+        const result = await pool.query(`
+    SELECT
+        t.id,
+        t.title,
+        t.content,
+        t.category,
+        t.author,
+        t.date,
+        t.views,
+        COUNT(c.id)::int AS comment_count
+    FROM threads t
+    LEFT JOIN comments c
+        ON c.thread_id = t.id
+    GROUP BY
+        t.id,
+        t.title,
+        t.content,
+        t.category,
+        t.author,
+        t.date,
+        t.views
+    ORDER BY t.id DESC
+    LIMIT 10
+`);
 
         res.render("category", {
 
@@ -239,7 +284,10 @@ app.get("/category/:name", async (req, res) => {
 
     } catch (error) {
 
-        console.error("CATEGORY ERROR:", error);
+        console.error(
+            "CATEGORY ERROR:",
+            error
+        );
 
         res.status(500).send(
             "Terjadi kesalahan pada database."
@@ -348,7 +396,10 @@ app.post("/create", async (req, res) => {
 
     } catch (error) {
 
-        console.error("CREATE THREAD ERROR:", error);
+        console.error(
+            "CREATE THREAD ERROR:",
+            error
+        );
 
         res.status(500).send(
             "Gagal membuat thread."
@@ -366,21 +417,22 @@ app.get("/thread/:id", async (req, res) => {
 
     try {
 
-        const threadResult = await pool.query(
-            `
-            SELECT
-                id,
-                title,
-                content,
-                category,
-                author,
-                date,
-                views
-            FROM threads
-            WHERE id = $1
-            `,
-            [req.params.id]
-        );
+        const threadResult =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    title,
+                    content,
+                    category,
+                    author,
+                    date,
+                    views
+                FROM threads
+                WHERE id = $1
+                `,
+                [req.params.id]
+            );
 
         if (threadResult.rows.length === 0) {
 
@@ -444,7 +496,10 @@ app.get("/thread/:id", async (req, res) => {
 
     } catch (error) {
 
-        console.error("THREAD ERROR:", error);
+        console.error(
+            "THREAD ERROR:",
+            error
+        );
 
         res.status(500).send(
             "Gagal membuka thread."
@@ -513,7 +568,10 @@ app.post("/thread/:id/comment", async (req, res) => {
 
     } catch (error) {
 
-        console.error("COMMENT ERROR:", error);
+        console.error(
+            "COMMENT ERROR:",
+            error
+        );
 
         res.status(500).send(
             "Gagal menambahkan komentar."

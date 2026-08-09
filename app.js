@@ -1,14 +1,25 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const session = require("express-session");
+const { Pool } = require("pg");
 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-const DATA_FILE = path.join(__dirname, "threads.json");
-const USERS_FILE = path.join(__dirname, "users.json");
+// =====================================================
+// POSTGRESQL
+// =====================================================
+
+if (!process.env.DATABASE_URL) {
+    console.warn("WARNING: DATABASE_URL belum tersedia.");
+}
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL
+        ? { rejectUnauthorized: false }
+        : false
+});
 
 // =====================================================
 // MIDDLEWARE
@@ -18,9 +29,14 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
     session({
-        secret: "world-football-forum-secret",
+        secret: process.env.SESSION_SECRET || "world-football-forum-secret",
         resave: false,
-        saveUninitialized: false
+        saveUninitialized: false,
+        cookie: {
+            secure: false,
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24 * 7
+        }
     })
 );
 
@@ -29,103 +45,7 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 
 // =====================================================
-// THREAD DATA
-// =====================================================
-
-let threads = [];
-
-if (fs.existsSync(DATA_FILE)) {
-    try {
-        threads = JSON.parse(
-            fs.readFileSync(DATA_FILE, "utf8")
-        );
-
-        if (!Array.isArray(threads)) {
-            threads = [];
-        }
-
-    } catch (error) {
-        console.log("Gagal membaca threads.json:", error);
-        threads = [];
-    }
-}
-
-// =====================================================
-// NORMALISASI DATA THREAD LAMA
-// =====================================================
-
-threads = threads.map(thread => {
-
-    return {
-        ...thread,
-
-        id: thread.id || Date.now(),
-
-        title: thread.title || "Tanpa judul",
-
-        content: thread.content || "",
-
-        category: thread.category || "berita",
-
-        author: thread.author || "Unknown",
-
-        date: thread.date || new Date().toLocaleDateString(),
-
-        views: Number(thread.views) || 0,
-
-        comments: Array.isArray(thread.comments)
-            ? thread.comments
-            : []
-    };
-
-});
-
-function saveThreads() {
-
-    fs.writeFileSync(
-        DATA_FILE,
-        JSON.stringify(threads, null, 2)
-    );
-
-}
-
-// =====================================================
-// USER DATA
-// =====================================================
-
-let users = [];
-
-if (fs.existsSync(USERS_FILE)) {
-
-    try {
-
-        users = JSON.parse(
-            fs.readFileSync(USERS_FILE, "utf8")
-        );
-
-        if (!Array.isArray(users)) {
-            users = [];
-        }
-
-    } catch (error) {
-
-        console.log("Gagal membaca users.json:", error);
-
-        users = [];
-    }
-}
-
-function saveUsers() {
-
-    fs.writeFileSync(
-        USERS_FILE,
-        JSON.stringify(users, null, 2)
-    );
-
-}
-
-// =====================================================
-// KATEGORI YANG DIIZINKAN
+// KATEGORI
 // =====================================================
 
 const VALID_CATEGORIES = [
@@ -143,27 +63,131 @@ const VALID_CATEGORIES = [
 ];
 
 // =====================================================
+// DATABASE SETUP
+// =====================================================
+
+async function initDatabase() {
+
+    if (!process.env.DATABASE_URL) {
+        console.log("Database belum terhubung. DATABASE_URL tidak ditemukan.");
+        return;
+    }
+
+    try {
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id BIGINT PRIMARY KEY,
+                username VARCHAR(100) UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS threads (
+                id BIGINT PRIMARY KEY,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                category VARCHAR(100) NOT NULL,
+                author VARCHAR(100) NOT NULL,
+                date TEXT NOT NULL,
+                views INTEGER DEFAULT 0
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS comments (
+                id BIGSERIAL PRIMARY KEY,
+                thread_id BIGINT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+                author VARCHAR(100) NOT NULL,
+                text TEXT NOT NULL,
+                date TEXT NOT NULL
+            )
+        `);
+
+        console.log("PostgreSQL database siap.");
+
+        // =================================================
+        // MIGRASI USER LAMA
+        // =================================================
+
+        const existingUser = await pool.query(
+            "SELECT id FROM users WHERE username = $1",
+            ["dodo"]
+        );
+
+        if (existingUser.rows.length === 0) {
+
+            await pool.query(
+                `
+                INSERT INTO users (id, username, password)
+                VALUES ($1, $2, $3)
+                `,
+                [
+                    1786147459509,
+                    "dodo",
+                    "123456"
+                ]
+            );
+
+            console.log("User lama dodo berhasil dimasukkan ke PostgreSQL.");
+
+        } else {
+
+            console.log("User dodo sudah ada di PostgreSQL.");
+
+        }
+
+    } catch (error) {
+
+        console.error("DATABASE ERROR:", error);
+
+    }
+}
+
+// =====================================================
 // HOME
 // =====================================================
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
 
-    console.log(
-        "HOME SESSION:",
-        req.session.username
-    );
+    try {
 
-    const latestThreads = [...threads]
-        .sort((a, b) => b.id - a.id)
-        .slice(0, 10);
+        console.log(
+            "HOME SESSION:",
+            req.session.username
+        );
 
-    res.render("index", {
+        const result = await pool.query(`
+            SELECT
+                id,
+                title,
+                content,
+                category,
+                author,
+                date,
+                views
+            FROM threads
+            ORDER BY id DESC
+            LIMIT 10
+        `);
 
-        user: req.session.username,
+        const threads = result.rows;
 
-        threads: latestThreads
+        res.render("index", {
+            user: req.session.username,
+            threads
+        });
 
-    });
+    } catch (error) {
+
+        console.error("HOME ERROR:", error);
+
+        res.status(500).send(
+            "Terjadi kesalahan pada database."
+        );
+
+    }
 
 });
 
@@ -171,36 +195,57 @@ app.get("/", (req, res) => {
 // CATEGORY
 // =====================================================
 
-app.get("/category/:name", (req, res) => {
+app.get("/category/:name", async (req, res) => {
 
-    const categoryName =
-        req.params.name.toLowerCase();
+    try {
 
-    // Cek apakah kategori valid
-    if (!VALID_CATEGORIES.includes(categoryName)) {
+        const categoryName =
+            req.params.name.toLowerCase();
 
-        return res.status(404).send(
-            "Kategori tidak ditemukan."
+        if (!VALID_CATEGORIES.includes(categoryName)) {
+
+            return res.status(404).send(
+                "Kategori tidak ditemukan."
+            );
+
+        }
+
+        const result = await pool.query(
+            `
+            SELECT
+                id,
+                title,
+                content,
+                category,
+                author,
+                date,
+                views
+            FROM threads
+            WHERE category = $1
+            ORDER BY id DESC
+            `,
+            [categoryName]
+        );
+
+        res.render("category", {
+
+            category: categoryName,
+
+            threads: result.rows,
+
+            user: req.session.username
+
+        });
+
+    } catch (error) {
+
+        console.error("CATEGORY ERROR:", error);
+
+        res.status(500).send(
+            "Terjadi kesalahan pada database."
         );
 
     }
-
-    const filteredThreads = threads
-        .filter(thread =>
-            String(thread.category).toLowerCase()
-            === categoryName
-        )
-        .sort((a, b) => b.id - a.id);
-
-    res.render("category", {
-
-        category: categoryName,
-
-        threads: filteredThreads,
-
-        user: req.session.username
-
-    });
 
 });
 
@@ -227,136 +272,89 @@ app.get("/create", (req, res) => {
 });
 
 // =====================================================
-// CREATE THREAD - SAVE
+// CREATE THREAD
 // =====================================================
 
-app.post("/create", (req, res) => {
+app.post("/create", async (req, res) => {
 
-    if (!req.session.username) {
+    try {
 
-        return res.redirect("/login");
+        if (!req.session.username) {
 
-    }
+            return res.redirect("/login");
 
-    console.log(
-        "DATA CREATE:",
-        req.body
-    );
+        }
 
-    const title =
-        String(req.body.title || "").trim();
+        const title =
+            String(req.body.title || "").trim();
 
-    const content =
-        String(req.body.content || "").trim();
+        const content =
+            String(req.body.content || "").trim();
 
-    const category =
-        String(req.body.category || "")
-            .trim()
-            .toLowerCase();
+        const category =
+            String(req.body.category || "")
+                .trim()
+                .toLowerCase();
 
-    // Validasi judul
-    if (!title) {
+        if (!title) {
 
-        return res.send(
-            "Judul thread wajib diisi."
+            return res.send(
+                "Judul thread wajib diisi."
+            );
+
+        }
+
+        if (!content) {
+
+            return res.send(
+                "Isi thread wajib diisi."
+            );
+
+        }
+
+        if (!VALID_CATEGORIES.includes(category)) {
+
+            return res.send(
+                "Kategori tidak valid."
+            );
+
+        }
+
+        const threadId = Date.now();
+
+        const date =
+            new Date().toLocaleDateString();
+
+        await pool.query(
+            `
+            INSERT INTO threads
+            (id, title, content, category, author, date, views)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `,
+            [
+                threadId,
+                title,
+                content,
+                category,
+                req.session.username,
+                date,
+                0
+            ]
+        );
+
+        res.redirect(
+            "/thread/" + threadId
+        );
+
+    } catch (error) {
+
+        console.error("CREATE THREAD ERROR:", error);
+
+        res.status(500).send(
+            "Gagal membuat thread."
         );
 
     }
-
-    // Validasi isi
-    if (!content) {
-
-        return res.send(
-            "Isi thread wajib diisi."
-        );
-
-    }
-
-    // Validasi kategori
-    if (!VALID_CATEGORIES.includes(category)) {
-
-        return res.send(
-            "Kategori tidak valid."
-        );
-
-    }
-
-    const newThread = {
-
-        id: Date.now(),
-
-        title: title,
-
-        content: content,
-
-        category: category,
-
-        author: req.session.username,
-
-        date: new Date().toLocaleDateString(),
-
-        views: 0,
-
-        comments: []
-
-    };
-
-    threads.push(newThread);
-
-    saveThreads();
-
-    res.redirect(
-        "/thread/" + newThread.id
-    );
-
-});
-
-// =====================================================
-// DELETE THREAD
-// =====================================================
-
-app.post("/thread/:id/delete", (req, res) => {
-
-    if (!req.session.username) {
-
-        return res.redirect("/login");
-
-    }
-
-    const threadIndex = threads.findIndex(
-        thread =>
-            thread.id == req.params.id
-    );
-
-    if (threadIndex === -1) {
-
-        return res.send(
-            "Thread tidak ditemukan."
-        );
-
-    }
-
-    const thread =
-        threads[threadIndex];
-
-    // Hanya pemilik thread
-    // yang boleh menghapus
-    if (
-        thread.author !==
-        req.session.username
-    ) {
-
-        return res.status(403).send(
-            "Kamu tidak boleh menghapus thread ini."
-        );
-
-    }
-
-    threads.splice(threadIndex, 1);
-
-    saveThreads();
-
-    res.redirect("/");
 
 });
 
@@ -364,60 +362,95 @@ app.post("/thread/:id/delete", (req, res) => {
 // THREAD DETAIL
 // =====================================================
 
-app.get("/thread/:id", (req, res) => {
+app.get("/thread/:id", async (req, res) => {
 
-    const thread = threads.find(
-        thread =>
-            thread.id == req.params.id
-    );
+    try {
 
-    if (!thread) {
+        const threadResult = await pool.query(
+            `
+            SELECT
+                id,
+                title,
+                content,
+                category,
+                author,
+                date,
+                views
+            FROM threads
+            WHERE id = $1
+            `,
+            [req.params.id]
+        );
 
-        return res.send(
-            "Thread tidak ditemukan."
+        if (threadResult.rows.length === 0) {
+
+            return res.send(
+                "Thread tidak ditemukan."
+            );
+
+        }
+
+        const thread =
+            threadResult.rows[0];
+
+        await pool.query(
+            `
+            UPDATE threads
+            SET views = views + 1
+            WHERE id = $1
+            `,
+            [req.params.id]
+        );
+
+        thread.views =
+            Number(thread.views || 0) + 1;
+
+        const commentsResult =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    author,
+                    text,
+                    date
+                FROM comments
+                WHERE thread_id = $1
+                ORDER BY id ASC
+                `,
+                [req.params.id]
+            );
+
+        res.render("thread", {
+
+            id: thread.id,
+
+            title: thread.title,
+
+            content: thread.content,
+
+            category: thread.category,
+
+            author: thread.author,
+
+            date: thread.date,
+
+            views: thread.views,
+
+            comments: commentsResult.rows,
+
+            user: req.session.username
+
+        });
+
+    } catch (error) {
+
+        console.error("THREAD ERROR:", error);
+
+        res.status(500).send(
+            "Gagal membuka thread."
         );
 
     }
-
-    // Pastikan data lama aman
-    if (!Array.isArray(thread.comments)) {
-
-        thread.comments = [];
-
-    }
-
-    if (!thread.views) {
-
-        thread.views = 0;
-
-    }
-
-    // Tambah jumlah views
-    thread.views++;
-
-    saveThreads();
-
-    res.render("thread", {
-
-        id: thread.id,
-
-        title: thread.title,
-
-        content: thread.content,
-
-        category: thread.category,
-
-        author: thread.author,
-
-        date: thread.date,
-
-        views: thread.views,
-
-        comments: thread.comments,
-
-        user: req.session.username
-
-    });
 
 });
 
@@ -425,61 +458,68 @@ app.get("/thread/:id", (req, res) => {
 // ADD COMMENT
 // =====================================================
 
-app.post("/thread/:id/comment", (req, res) => {
+app.post("/thread/:id/comment", async (req, res) => {
 
-    if (!req.session.username) {
+    try {
 
-        return res.redirect("/login");
+        if (!req.session.username) {
 
-    }
+            return res.redirect("/login");
 
-    const thread = threads.find(
-        thread =>
-            thread.id == req.params.id
-    );
+        }
 
-    if (!thread) {
+        const threadResult =
+            await pool.query(
+                "SELECT id FROM threads WHERE id = $1",
+                [req.params.id]
+            );
 
-        return res.send(
-            "Thread tidak ditemukan."
+        if (threadResult.rows.length === 0) {
+
+            return res.send(
+                "Thread tidak ditemukan."
+            );
+
+        }
+
+        const commentText =
+            String(req.body.comment || "").trim();
+
+        if (!commentText) {
+
+            return res.send(
+                "Komentar tidak boleh kosong."
+            );
+
+        }
+
+        await pool.query(
+            `
+            INSERT INTO comments
+            (thread_id, author, text, date)
+            VALUES ($1, $2, $3, $4)
+            `,
+            [
+                req.params.id,
+                req.session.username,
+                commentText,
+                new Date().toLocaleDateString()
+            ]
+        );
+
+        res.redirect(
+            "/thread/" + req.params.id
+        );
+
+    } catch (error) {
+
+        console.error("COMMENT ERROR:", error);
+
+        res.status(500).send(
+            "Gagal menambahkan komentar."
         );
 
     }
-
-    if (!Array.isArray(thread.comments)) {
-
-        thread.comments = [];
-
-    }
-
-    const commentText =
-        String(req.body.comment || "").trim();
-
-    if (!commentText) {
-
-        return res.send(
-            "Komentar tidak boleh kosong."
-        );
-
-    }
-
-    const newComment = {
-
-        author: req.session.username,
-
-        text: commentText,
-
-        date: new Date().toLocaleDateString()
-
-    };
-
-    thread.comments.push(newComment);
-
-    saveThreads();
-
-    res.redirect(
-        "/thread/" + thread.id
-    );
 
 });
 
@@ -489,7 +529,95 @@ app.post("/thread/:id/comment", (req, res) => {
 
 app.post(
     "/thread/:id/comment/delete/:commentIndex",
-    (req, res) => {
+    async (req, res) => {
+
+        try {
+
+            if (!req.session.username) {
+
+                return res.redirect("/login");
+
+            }
+
+            const commentsResult =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        author
+                    FROM comments
+                    WHERE thread_id = $1
+                    ORDER BY id ASC
+                    `,
+                    [req.params.id]
+                );
+
+            const commentIndex =
+                parseInt(
+                    req.params.commentIndex
+                );
+
+            if (
+                isNaN(commentIndex) ||
+                commentIndex < 0 ||
+                commentIndex >= commentsResult.rows.length
+            ) {
+
+                return res.send(
+                    "Komentar tidak ditemukan."
+                );
+
+            }
+
+            const comment =
+                commentsResult.rows[commentIndex];
+
+            if (
+                comment.author !==
+                req.session.username
+            ) {
+
+                return res.status(403).send(
+                    "Kamu tidak boleh menghapus komentar ini."
+                );
+
+            }
+
+            await pool.query(
+                `
+                DELETE FROM comments
+                WHERE id = $1
+                `,
+                [comment.id]
+            );
+
+            res.redirect(
+                "/thread/" + req.params.id
+            );
+
+        } catch (error) {
+
+            console.error(
+                "DELETE COMMENT ERROR:",
+                error
+            );
+
+            res.status(500).send(
+                "Gagal menghapus komentar."
+            );
+
+        }
+
+    }
+);
+
+// =====================================================
+// DELETE THREAD
+// =====================================================
+
+app.post("/thread/:id/delete", async (req, res) => {
+
+    try {
 
         if (!req.session.username) {
 
@@ -497,12 +625,17 @@ app.post(
 
         }
 
-        const thread = threads.find(
-            thread =>
-                thread.id == req.params.id
-        );
+        const result =
+            await pool.query(
+                `
+                SELECT author
+                FROM threads
+                WHERE id = $1
+                `,
+                [req.params.id]
+            );
 
-        if (!thread) {
+        if (result.rows.length === 0) {
 
             return res.send(
                 "Thread tidak ditemukan."
@@ -510,63 +643,44 @@ app.post(
 
         }
 
-        if (!Array.isArray(thread.comments)) {
-
-            thread.comments = [];
-
-        }
-
-        const commentIndex =
-            parseInt(
-                req.params.commentIndex
-            );
+        const thread =
+            result.rows[0];
 
         if (
-
-            isNaN(commentIndex) ||
-
-            commentIndex < 0 ||
-
-            commentIndex >=
-            thread.comments.length
-
-        ) {
-
-            return res.send(
-                "Komentar tidak ditemukan."
-            );
-
-        }
-
-        const comment =
-            thread.comments[commentIndex];
-
-        // Hanya pemilik komentar
-        // yang boleh menghapus
-        if (
-            comment.author !==
+            thread.author !==
             req.session.username
         ) {
 
             return res.status(403).send(
-                "Kamu tidak boleh menghapus komentar ini."
+                "Kamu tidak boleh menghapus thread ini."
             );
 
         }
 
-        thread.comments.splice(
-            commentIndex,
-            1
+        await pool.query(
+            `
+            DELETE FROM threads
+            WHERE id = $1
+            `,
+            [req.params.id]
         );
 
-        saveThreads();
+        res.redirect("/");
 
-        res.redirect(
-            "/thread/" + thread.id
+    } catch (error) {
+
+        console.error(
+            "DELETE THREAD ERROR:",
+            error
+        );
+
+        res.status(500).send(
+            "Gagal menghapus thread."
         );
 
     }
-);
+
+});
 
 // =====================================================
 // LOGIN - FORM
@@ -582,62 +696,91 @@ app.get("/login", (req, res) => {
 // LOGIN
 // =====================================================
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
 
-    const username =
-        String(req.body.username || "").trim();
+    try {
 
-    const password =
-        String(req.body.password || "");
+        const username =
+            String(req.body.username || "").trim();
 
-    const user = users.find(
-        user =>
-            user.username === username &&
-            user.password === password
-    );
+        const password =
+            String(req.body.password || "");
 
-    if (!user) {
-
-        return res.send(
-            "Username atau password salah."
-        );
-
-    }
-
-    req.session.userId =
-        user.id;
-
-    req.session.username =
-        user.username;
-
-    req.session.save((err) => {
-
-        if (err) {
-
-            console.log(
-                "SESSION ERROR:",
-                err
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    username,
+                    password
+                FROM users
+                WHERE username = $1
+                AND password = $2
+                `,
+                [
+                    username,
+                    password
+                ]
             );
 
+        if (result.rows.length === 0) {
+
             return res.send(
-                "Session gagal disimpan."
+                "Username atau password salah."
             );
 
         }
 
-        console.log(
-            "USER LOGIN:",
-            req.session.username
+        const user =
+            result.rows[0];
+
+        req.session.userId =
+            user.id;
+
+        req.session.username =
+            user.username;
+
+        req.session.save((err) => {
+
+            if (err) {
+
+                console.log(
+                    "SESSION ERROR:",
+                    err
+                );
+
+                return res.send(
+                    "Session gagal disimpan."
+                );
+
+            }
+
+            console.log(
+                "USER LOGIN:",
+                req.session.username
+            );
+
+            console.log(
+                "SESSION ID:",
+                req.sessionID
+            );
+
+            res.redirect("/");
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "LOGIN ERROR:",
+            error
         );
 
-        console.log(
-            "SESSION ID:",
-            req.sessionID
+        res.status(500).send(
+            "Gagal login."
         );
 
-        res.redirect("/");
-
-    });
+    }
 
 });
 
@@ -682,69 +825,124 @@ app.get("/register", (req, res) => {
 // REGISTER
 // =====================================================
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
 
-    const username =
-        String(req.body.username || "").trim();
+    try {
 
-    const password =
-        String(req.body.password || "");
+        const username =
+            String(req.body.username || "").trim();
 
-    const confirmPassword =
-        String(req.body.confirmPassword || "");
+        const password =
+            String(req.body.password || "");
 
-    if (!username) {
+        const confirmPassword =
+            String(req.body.confirmPassword || "");
 
-        return res.send(
-            "Username wajib diisi."
+        if (!username) {
+
+            return res.send(
+                "Username wajib diisi."
+            );
+
+        }
+
+        if (!password) {
+
+            return res.send(
+                "Password wajib diisi."
+            );
+
+        }
+
+        if (password !== confirmPassword) {
+
+            return res.send(
+                "Password dan konfirmasi password tidak sama."
+            );
+
+        }
+
+        const existingUser =
+            await pool.query(
+                `
+                SELECT id
+                FROM users
+                WHERE username = $1
+                `,
+                [username]
+            );
+
+        if (existingUser.rows.length > 0) {
+
+            return res.send(
+                "Username sudah digunakan."
+            );
+
+        }
+
+        const newUserId =
+            Date.now();
+
+        await pool.query(
+            `
+            INSERT INTO users
+            (id, username, password)
+            VALUES ($1, $2, $3)
+            `,
+            [
+                newUserId,
+                username,
+                password
+            ]
+        );
+
+        res.redirect("/login");
+
+    } catch (error) {
+
+        console.error(
+            "REGISTER ERROR:",
+            error
+        );
+
+        res.status(500).send(
+            "Gagal melakukan registrasi."
         );
 
     }
 
-    if (!password) {
+});
 
-        return res.send(
-            "Password wajib diisi."
+// =====================================================
+// DATABASE TEST
+// =====================================================
+
+app.get("/db-test", async (req, res) => {
+
+    try {
+
+        const result =
+            await pool.query(
+                "SELECT NOW() AS waktu"
+            );
+
+        res.send(
+            "DATABASE OK - " +
+            result.rows[0].waktu
+        );
+
+    } catch (error) {
+
+        console.error(
+            "DB TEST ERROR:",
+            error
+        );
+
+        res.status(500).send(
+            "DATABASE ERROR"
         );
 
     }
-
-    if (password !== confirmPassword) {
-
-        return res.send(
-            "Password dan konfirmasi password tidak sama."
-        );
-
-    }
-
-    const existingUser = users.find(
-        user =>
-            user.username === username
-    );
-
-    if (existingUser) {
-
-        return res.send(
-            "Username sudah digunakan."
-        );
-
-    }
-
-    const newUser = {
-
-        id: Date.now(),
-
-        username: username,
-
-        password: password
-
-    };
-
-    users.push(newUser);
-
-    saveUsers();
-
-    res.redirect("/login");
 
 });
 
@@ -752,10 +950,22 @@ app.post("/register", (req, res) => {
 // START SERVER
 // =====================================================
 
-app.listen(PORT, "0.0.0.0", () => {
+async function startServer() {
 
-    console.log(
-        `Forum berjalan di port ${PORT}`
+    await initDatabase();
+
+    app.listen(
+        PORT,
+        "0.0.0.0",
+        () => {
+
+            console.log(
+                `Forum berjalan di port ${PORT}`
+            );
+
+        }
     );
 
-});
+}
+
+startServer();

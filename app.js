@@ -97,7 +97,6 @@ function isBcryptHash(password) {
 async function initDatabase() {
 
     if (!process.env.DATABASE_URL) {
-
         console.log(
             "Database belum terhubung. DATABASE_URL tidak ditemukan."
         );
@@ -195,10 +194,6 @@ async function initDatabase() {
 
             const user = existingUser.rows[0];
 
-            // =================================================
-            // MIGRASI PASSWORD DODO JIKA MASIH PLAINTEXT
-            // =================================================
-
             if (!isBcryptHash(user.password)) {
 
                 const hashedPassword =
@@ -228,7 +223,6 @@ async function initDatabase() {
                 console.log(
                     "User dodo sudah ada dan password sudah aman."
                 );
-
             }
         }
 
@@ -347,13 +341,9 @@ app.get("/category/:name", async (req, res) => {
         );
 
         res.render("category", {
-
             category: categoryName,
-
             threads: result.rows,
-
             user: req.session.username
-
         });
 
     } catch (error) {
@@ -376,16 +366,12 @@ app.get("/category/:name", async (req, res) => {
 app.get("/create", (req, res) => {
 
     if (!req.session.username) {
-
         return res.redirect("/login");
     }
 
     res.render("create", {
-
         user: req.session.username,
-
         categories: VALID_CATEGORIES
-
     });
 });
 
@@ -398,7 +384,6 @@ app.post("/create", async (req, res) => {
     try {
 
         if (!req.session.username) {
-
             return res.redirect("/login");
         }
 
@@ -414,21 +399,18 @@ app.post("/create", async (req, res) => {
                 .toLowerCase();
 
         if (!title) {
-
             return res.send(
                 "Judul thread wajib diisi."
             );
         }
 
         if (!content) {
-
             return res.send(
                 "Isi thread wajib diisi."
             );
         }
 
         if (!VALID_CATEGORIES.includes(category)) {
-
             return res.send(
                 "Kategori tidak valid."
             );
@@ -554,7 +536,6 @@ app.get("/thread/:id", async (req, res) => {
             comments: commentsResult.rows,
 
             user: req.session.username
-
         });
 
     } catch (error) {
@@ -579,7 +560,6 @@ app.post("/thread/:id/comment", async (req, res) => {
     try {
 
         if (!req.session.username) {
-
             return res.redirect("/login");
         }
 
@@ -648,7 +628,6 @@ app.post(
         try {
 
             if (!req.session.username) {
-
                 return res.redirect("/login");
             }
 
@@ -730,7 +709,6 @@ app.post("/thread/:id/delete", async (req, res) => {
     try {
 
         if (!req.session.username) {
-
             return res.redirect("/login");
         }
 
@@ -840,10 +818,6 @@ app.post("/login", async (req, res) => {
         const user =
             result.rows[0];
 
-        // =================================================
-        // PASSWORD BCRYPT
-        // =================================================
-
         let passwordMatch = false;
 
         if (isBcryptHash(user.password)) {
@@ -855,12 +829,6 @@ app.post("/login", async (req, res) => {
                 );
 
         } else {
-
-            // =================================================
-            // MIGRASI PASSWORD LAMA
-            // =================================================
-            // Jika password lama masih plaintext,
-            // cek terlebih dahulu lalu langsung hash.
 
             passwordMatch =
                 password === user.password;
@@ -886,7 +854,7 @@ app.post("/login", async (req, res) => {
                 );
 
                 console.log(
-                    "Password user lama berhasil dimigrasikan ke bcrypt."
+                    "Password lama berhasil dimigrasikan ke bcrypt."
                 );
             }
         }
@@ -897,10 +865,6 @@ app.post("/login", async (req, res) => {
                 "Username atau password salah."
             );
         }
-
-        // =================================================
-        // SESSION
-        // =================================================
 
         req.session.userId =
             user.id;
@@ -932,7 +896,6 @@ app.post("/login", async (req, res) => {
             );
 
             res.redirect("/");
-
         });
 
     } catch (error) {
@@ -947,6 +910,205 @@ app.post("/login", async (req, res) => {
         );
     }
 });
+
+// =====================================================
+// PROFILE
+// =====================================================
+
+app.get("/profile", async (req, res) => {
+
+    try {
+
+        if (!req.session.username) {
+            return res.redirect("/login");
+        }
+
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    username
+                FROM users
+                WHERE id = $1
+                `,
+                [req.session.userId]
+            );
+
+        if (result.rows.length === 0) {
+            return res.redirect("/logout");
+        }
+
+        const user =
+            result.rows[0];
+
+        res.render("profile", {
+            user: user.username,
+            userId: user.id
+        });
+
+    } catch (error) {
+
+        console.error(
+            "PROFILE ERROR:",
+            error
+        );
+
+        res.status(500).send(
+            "Gagal membuka profil."
+        );
+    }
+});
+
+// =====================================================
+// CHANGE PASSWORD
+// =====================================================
+
+app.post(
+    "/profile/change-password",
+    async (req, res) => {
+
+        try {
+
+            if (!req.session.username) {
+                return res.redirect("/login");
+            }
+
+            const currentPassword =
+                String(
+                    req.body.currentPassword || ""
+                );
+
+            const newPassword =
+                String(
+                    req.body.newPassword || ""
+                );
+
+            const confirmPassword =
+                String(
+                    req.body.confirmPassword || ""
+                );
+
+            if (!currentPassword) {
+
+                return res.send(
+                    "Password lama wajib diisi."
+                );
+            }
+
+            if (!newPassword) {
+
+                return res.send(
+                    "Password baru wajib diisi."
+                );
+            }
+
+            if (newPassword.length < 6) {
+
+                return res.send(
+                    "Password baru minimal 6 karakter."
+                );
+            }
+
+            if (newPassword.length > 72) {
+
+                return res.send(
+                    "Password baru maksimal 72 karakter."
+                );
+            }
+
+            if (newPassword !== confirmPassword) {
+
+                return res.send(
+                    "Konfirmasi password baru tidak sama."
+                );
+            }
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        username,
+                        password
+                    FROM users
+                    WHERE id = $1
+                    `,
+                    [req.session.userId]
+                );
+
+            if (result.rows.length === 0) {
+                return res.redirect("/logout");
+            }
+
+            const user =
+                result.rows[0];
+
+            if (!isBcryptHash(user.password)) {
+
+                return res.send(
+                    "Password akun belum menggunakan sistem keamanan bcrypt. Silakan logout dan login kembali."
+                );
+            }
+
+            const passwordMatch =
+                await bcrypt.compare(
+                    currentPassword,
+                    user.password
+                );
+
+            if (!passwordMatch) {
+
+                return res.send(
+                    "Password lama salah."
+                );
+            }
+
+            if (currentPassword === newPassword) {
+
+                return res.send(
+                    "Password baru harus berbeda dari password lama."
+                );
+            }
+
+            const hashedPassword =
+                await bcrypt.hash(
+                    newPassword,
+                    12
+                );
+
+            await pool.query(
+                `
+                UPDATE users
+                SET password = $1
+                WHERE id = $2
+                `,
+                [
+                    hashedPassword,
+                    user.id
+                ]
+            );
+
+            console.log(
+                "PASSWORD BERHASIL DIUBAH:",
+                user.username
+            );
+
+            res.redirect("/profile");
+
+        } catch (error) {
+
+            console.error(
+                "CHANGE PASSWORD ERROR:",
+                error
+            );
+
+            res.status(500).send(
+                "Gagal mengubah password."
+            );
+        }
+    }
+);
 
 // =====================================================
 // LOGOUT
@@ -969,7 +1131,6 @@ app.get("/logout", (req, res) => {
         }
 
         res.redirect("/");
-
     });
 });
 
@@ -1068,10 +1229,6 @@ app.post("/register", async (req, res) => {
         const newUserId =
             Date.now();
 
-        // =================================================
-        // HASH PASSWORD DENGAN BCRYPT
-        // =================================================
-
         const hashedPassword =
             await bcrypt.hash(
                 password,
@@ -1158,7 +1315,6 @@ async function startServer() {
             console.log(
                 `Forum berjalan di port ${PORT}`
             );
-
         }
     );
 }

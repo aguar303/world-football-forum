@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Profil - World Football Forum</title>
+
+<link rel="stylesheet" href="/css/style.css">
+```
+
+</head>
+
+<body>
+
+```
+<!-- HEADER -->
+
+<header>
+
+    <div class="container">
+
+        <div class="logo">
+            ⚽ <span>WORLD</span> FOOTBALL FORUM
+        </div>
+
+        <nav>
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/category/berita">
+                Berita
+            </a>
+
+            <a href="/category/transfer">
+                Transfer
+            </a>
+
+            <a href="/category/kompetisi">
+                Kompetisi
+            </a>
+
+            <a href="/category/komunitas">
+                Komunitas
+            </a>
+
+            <a href="/profile">
+                👤 <%= user %>
+            </a>
+
+            <a href="/logout">
+                Logout
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<!-- CONTENT -->
+
+<main class="container">
+
+    <!-- PROFILE -->
+
+    <section class="hero">
+
+        <h1>
+            👤 Profil Pengguna
+        </h1>
+
+        <p>
+            Kelola akun World Football Forum kamu.
+        </p>
+
+    </section>
+
+
+    <!-- ACCOUNT INFORMATION -->
+
+    <section class="hero">
+
+        <h2>
+            Informasi Akun
+        </h2>
+
+        <br>
+
+        <p>
+            <strong>Username:</strong>
+            <%= user %>
+        </p>
+
+    </section>
+
+
+    <!-- CHANGE PASSWORD -->
+
+    <section class="hero">
+
+        <h2>
+            🔐 Ganti Password
+        </h2>
+
+        <br>
+
+        <form
+            action="/profile/change-password"
+            method="POST"
+        >
+
+            <p>
+                <label for="currentPassword">
+                    Password Lama
+                </label>
+            </p>
+
+            <input
+                type="password"
+                id="currentPassword"
+                name="currentPassword"
+                minlength="6"
+                maxlength="72"
+                required
+                autocomplete="current-password"
+            >
+
+
+            <br>
+            <br>
+
+
+            <p>
+                <label for="newPassword">
+                    Password Baru
+                </label>
+            </p>
+
+            <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                minlength="6"
+                maxlength="72"
+                required
+                autocomplete="new-password"
+            >
+
+
+            <br>
+            <br>
+
+
+            <p>
+                <label for="confirmPassword">
+                    Konfirmasi Password Baru
+                </label>
+            </p>
+
+            <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                minlength="6"
+                maxlength="72"
+                required
+                autocomplete="new-password"
+            >
+
+
+            <br>
+            <br>
+
+
+            <button type="submit">
+                🔐 Ganti Password
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <p>
+        © 2026 World Football Forum
+    </p>
+
+    <p>
+        Forum komunitas sepakbola dunia
+    </p>
+
+</footer>
+```
+
+</body>
+
+</html>

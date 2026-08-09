@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const { Pool } = require("pg");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -80,9 +81,11 @@ const VALID_CATEGORIES = [
 async function initDatabase() {
 
     if (!process.env.DATABASE_URL) {
+
         console.log(
             "Database belum terhubung. DATABASE_URL tidak ditemukan."
         );
+
         return;
     }
 
@@ -123,15 +126,25 @@ async function initDatabase() {
         console.log("PostgreSQL database siap.");
 
         // =================================================
-        // MIGRASI USER LAMA
+        // USER DODO
         // =================================================
 
         const existingUser = await pool.query(
-            "SELECT id FROM users WHERE username = $1",
+            `
+            SELECT
+                id,
+                username,
+                password
+            FROM users
+            WHERE username = $1
+            `,
             ["dodo"]
         );
 
         if (existingUser.rows.length === 0) {
+
+            const hashedPassword =
+                await bcrypt.hash("123456", 12);
 
             await pool.query(
                 `
@@ -142,19 +155,58 @@ async function initDatabase() {
                 [
                     1786147459509,
                     "dodo",
-                    "123456"
+                    hashedPassword
                 ]
             );
 
             console.log(
-                "User lama dodo berhasil dimasukkan ke PostgreSQL."
+                "User dodo berhasil dibuat dengan password aman."
             );
 
         } else {
 
-            console.log(
-                "User dodo sudah ada di PostgreSQL."
-            );
+            const user =
+                existingUser.rows[0];
+
+            // =================================================
+            // MIGRASI PASSWORD LAMA
+            // =================================================
+
+            if (
+                !user.password.startsWith("$2a$") &&
+                !user.password.startsWith("$2b$") &&
+                !user.password.startsWith("$2y$")
+            ) {
+
+                const hashedPassword =
+                    await bcrypt.hash(
+                        user.password,
+                        12
+                    );
+
+                await pool.query(
+                    `
+                    UPDATE users
+                    SET password = $1
+                    WHERE id = $2
+                    `,
+                    [
+                        hashedPassword,
+                        user.id
+                    ]
+                );
+
+                console.log(
+                    "Password user dodo berhasil diamankan dengan bcrypt."
+                );
+
+            } else {
+
+                console.log(
+                    "User dodo sudah ada dan password sudah aman."
+                );
+
+            }
 
         }
 
@@ -182,29 +234,29 @@ app.get("/", async (req, res) => {
         );
 
         const result = await pool.query(`
-    SELECT
-        t.id,
-        t.title,
-        t.content,
-        t.category,
-        t.author,
-        t.date,
-        t.views,
-        COUNT(c.id)::INTEGER AS comment_count
-    FROM threads t
-    LEFT JOIN comments c
-        ON c.thread_id = t.id
-    GROUP BY
-        t.id,
-        t.title,
-        t.content,
-        t.category,
-        t.author,
-        t.date,
-        t.views
-    ORDER BY t.id DESC
-    LIMIT 10
-`);
+            SELECT
+                t.id,
+                t.title,
+                t.content,
+                t.category,
+                t.author,
+                t.date,
+                t.views,
+                COUNT(c.id)::INTEGER AS comment_count
+            FROM threads t
+            LEFT JOIN comments c
+                ON c.thread_id = t.id
+            GROUP BY
+                t.id,
+                t.title,
+                t.content,
+                t.category,
+                t.author,
+                t.date,
+                t.views
+            ORDER BY t.id DESC
+            LIMIT 10
+        `);
 
         const threads = result.rows;
 
@@ -225,7 +277,6 @@ app.get("/", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -247,30 +298,34 @@ app.get("/category/:name", async (req, res) => {
 
         }
 
-        const result = await pool.query(`
-    SELECT
-        t.id,
-        t.title,
-        t.content,
-        t.category,
-        t.author,
-        t.date,
-        t.views,
-        COUNT(c.id)::int AS comment_count
-    FROM threads t
-    LEFT JOIN comments c
-        ON c.thread_id = t.id
-    GROUP BY
-        t.id,
-        t.title,
-        t.content,
-        t.category,
-        t.author,
-        t.date,
-        t.views
-    ORDER BY t.id DESC
-    LIMIT 10
-`);
+        const result = await pool.query(
+            `
+            SELECT
+                t.id,
+                t.title,
+                t.content,
+                t.category,
+                t.author,
+                t.date,
+                t.views,
+                COUNT(c.id)::INTEGER AS comment_count
+            FROM threads t
+            LEFT JOIN comments c
+                ON c.thread_id = t.id
+            WHERE t.category = $1
+            GROUP BY
+                t.id,
+                t.title,
+                t.content,
+                t.category,
+                t.author,
+                t.date,
+                t.views
+            ORDER BY t.id DESC
+            LIMIT 10
+            `,
+            [categoryName]
+        );
 
         res.render("category", {
 
@@ -294,7 +349,6 @@ app.get("/category/:name", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -406,7 +460,6 @@ app.post("/create", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -506,7 +559,6 @@ app.get("/thread/:id", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -578,7 +630,6 @@ app.post("/thread/:id/comment", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -737,7 +788,6 @@ app.post("/thread/:id/delete", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -773,12 +823,8 @@ app.post("/login", async (req, res) => {
                     password
                 FROM users
                 WHERE username = $1
-                AND password = $2
                 `,
-                [
-                    username,
-                    password
-                ]
+                [username]
             );
 
         if (result.rows.length === 0) {
@@ -791,6 +837,20 @@ app.post("/login", async (req, res) => {
 
         const user =
             result.rows[0];
+
+        const passwordMatch =
+            await bcrypt.compare(
+                password,
+                user.password
+            );
+
+        if (!passwordMatch) {
+
+            return res.send(
+                "Username atau password salah."
+            );
+
+        }
 
         req.session.userId =
             user.id;
@@ -839,7 +899,6 @@ app.post("/login", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -912,6 +971,14 @@ app.post("/register", async (req, res) => {
 
         }
 
+        if (password.length < 6) {
+
+            return res.send(
+                "Password minimal 6 karakter."
+            );
+
+        }
+
         if (password !== confirmPassword) {
 
             return res.send(
@@ -941,6 +1008,12 @@ app.post("/register", async (req, res) => {
         const newUserId =
             Date.now();
 
+        const hashedPassword =
+            await bcrypt.hash(
+                password,
+                12
+            );
+
         await pool.query(
             `
             INSERT INTO users
@@ -950,7 +1023,7 @@ app.post("/register", async (req, res) => {
             [
                 newUserId,
                 username,
-                password
+                hashedPassword
             ]
         );
 
@@ -968,7 +1041,6 @@ app.post("/register", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================
@@ -1001,7 +1073,6 @@ app.get("/db-test", async (req, res) => {
         );
 
     }
-
 });
 
 // =====================================================

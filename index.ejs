@@ -1,154 +1,227 @@
-```html
 <!DOCTYPE html>
+
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>World Football Forum</title>
+```
+<title>World Football Forum</title>
 
-    <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/style.css">
+```
+
 </head>
 
 <body>
 
-    <!-- HEADER -->
-    <header>
-        <div class="container">
+```
+<!-- HEADER -->
+<header>
+    <div class="container">
 
-            <div class="logo">
-                ⚽ <span>WORLD</span> FOOTBALL FORUM
-            </div>
+        <div class="logo">
+            ⚽ <span>WORLD</span> FOOTBALL FORUM
+        </div>
 
-            <nav>
+        <nav>
 
-    <a href="/">Home</a>
+            <a href="/">Home</a>
 
-    <a href="/category/berita">Berita</a>
+            <a href="/category/berita">
+                Berita
+            </a>
 
-    <a href="/category/transfer">Transfer</a>
+            <a href="/category/transfer">
+                Transfer
+            </a>
 
-    <a href="/category/kompetisi">Kompetisi</a>
+            <a href="/category/kompetisi">
+                Kompetisi
+            </a>
 
-    <a href="/category/komunitas">Komunitas</a>
+            <a href="/category/komunitas">
+                Komunitas
+            </a>
 
-    <% if (user) { %>
+            <% if (user) { %>
 
-        <span>👤 <%= user %></span>
+                <span>
+                    👤 <%= user %>
+                </span>
 
-        <a href="/logout">
-            Logout
+                <a href="/logout">
+                    Logout
+                </a>
+
+            <% } else { %>
+
+                <a href="/login">
+                    Login
+                </a>
+
+            <% } %>
+
+        </nav>
+
+    </div>
+</header>
+
+
+<!-- CONTENT -->
+<main class="container">
+
+    <!-- HERO -->
+    <section class="hero">
+
+        <h1>
+            ⚽ Selamat Datang di World Football Forum
+        </h1>
+
+        <p>
+            Tempat berdiskusi tentang sepakbola dunia,
+            berita, transfer, pertandingan, klub dan
+            pemain favoritmu.
+        </p>
+
+    </section>
+
+
+    <!-- KATEGORI -->
+    <h2 class="section-title">
+        🌍 Kategori Sepakbola
+    </h2>
+
+    <div class="categories">
+
+        <a href="/category/premier-league" class="category">
+            🇬🇧 Premier League
         </a>
+
+        <a href="/category/la-liga" class="category">
+            🇪🇸 La Liga
+        </a>
+
+        <a href="/category/serie-a" class="category">
+            🇮🇹 Serie A
+        </a>
+
+        <a href="/category/bundesliga" class="category">
+            🇩🇪 Bundesliga
+        </a>
+
+        <a href="/category/ligue-1" class="category">
+            🇫🇷 Ligue 1
+        </a>
+
+        <a href="/category/champions-league" class="category">
+            🏆 Champions League
+        </a>
+
+        <a href="/category/world-cup" class="category">
+            🌎 World Cup
+        </a>
+
+        <a href="/category/berita" class="category">
+            📰 Berita Sepakbola
+        </a>
+
+        <a href="/category/transfer" class="category">
+            🔄 Transfer & Rumor
+        </a>
+
+        <a href="/category/kompetisi" class="category">
+            🏆 Kompetisi
+        </a>
+
+        <a href="/category/komunitas" class="category">
+            💬 Diskusi Umum
+        </a>
+
+    </div>
+
+
+    <!-- TOPIK TERBARU -->
+    <h2 class="section-title">
+        🔥 Topik Terbaru
+    </h2>
+
+
+    <% if (threads && threads.length > 0) { %>
+
+        <% threads.forEach(thread => { %>
+
+            <section class="hero">
+
+                <h3>
+
+                    <a href="/thread/<%= thread.id %>">
+                        🔥 <%= thread.title %>
+                    </a>
+
+                </h3>
+
+                <p>
+                    <%= thread.content %>
+                </p>
+
+                <br>
+
+                <small>
+
+                    👤 <%= thread.author %>
+
+                    &nbsp; | &nbsp;
+
+                    📅 <%= thread.date %>
+
+                    &nbsp; | &nbsp;
+
+                    💬 <%= thread.comment_count || 0 %> komentar
+
+                    &nbsp; | &nbsp;
+
+                    👁 <%= thread.views || 0 %> views
+
+                </small>
+
+            </section>
+
+        <% }) %>
+
 
     <% } else { %>
 
-        <a href="/login">
-            Login
-        </a>
-
-    <% } %>
-
-</nav>
-
-        </div>
-    </header>
-
-
-    <!-- CONTENT -->
-    <main class="container">
-
-        <!-- HERO -->
         <section class="hero">
 
-            <h1>⚽ Selamat Datang di World Football Forum</h1>
+            <h3>
+                Belum ada topik
+            </h3>
 
             <p>
-                Tempat berdiskusi tentang sepakbola dunia,
-                berita, transfer, pertandingan, klub dan pemain favoritmu.
+                Belum ada diskusi yang dibuat.
             </p>
 
         </section>
 
+    <% } %>
 
-        <!-- KATEGORI -->
-        <h2 class="section-title">🌍 Kategori Sepakbola</h2>
-
-        <div class="categories">
-
-            <a href="/category/premier-league" class="category">
-    🇬🇧 Premier League
-</a>
-
-<a href="/category/la-liga" class="category">
-    🇪🇸 La Liga
-</a>
-
-<a href="/category/serie-a" class="category">
-    🇮🇹 Serie A
-</a>
-
-<a href="/category/bundesliga" class="category">
-    🇩🇪 Bundesliga
-</a>
-
-<a href="/category/ligue-1" class="category">
-    🇫🇷 Ligue 1
-</a>
-
-<a href="/category/champions-league" class="category">
-    🏆 Champions League
-</a>
-
-<a href="/category/world-cup" class="category">
-    🌎 World Cup
-</a>
-
-<a href="/category/transfer" class="category">
-    📰 Transfer & Rumor
-</a>
-
-<a href="/category/komunitas" class="category">
-    💬 Diskusi Umum
-</a>
-
-        </div>
+</main>
 
 
-        <!-- TOPIK TERBARU -->
-        <h2 class="section-title">🔥 Topik Terbaru</h2>
+<!-- FOOTER -->
+<footer>
 
-        <div class="hero">
+    <p>
+        © 2026 World Football Forum
+    </p>
 
-            <h3>Siapa kandidat juara liga musim ini?</h3>
+    <p>
+        Forum komunitas sepakbola dunia
+    </p>
 
-            <p>
-                Diskusikan tim favorit kamu dan berikan prediksimu.
-            </p>
-
-            <br>
-
-            <small>
-                💬 24 komentar &nbsp; | &nbsp; 👁 1.2K views
-            </small>
-
-        </div>
-
-    </main>
-
-
-    <!-- FOOTER -->
-    <footer>
-
-        <p>
-            © 2026 World Football Forum
-        </p>
-
-        <p>
-            Forum komunitas sepakbola dunia
-        </p>
-
-    </footer>
+</footer>
+```
 
 </body>
 </html>
-```

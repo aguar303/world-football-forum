@@ -1,214 +1,327 @@
 <!DOCTYPE html>
-
 <html lang="id">
 
 <head>
 
-```
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>Profil - World Football Forum</title>
+    <title>Profil - World Football Forum</title>
 
-<link rel="stylesheet" href="/css/style.css">
-```
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
 
 </head>
 
 <body>
 
-```
-<!-- HEADER -->
+    <!-- HEADER -->
 
-<header>
+    <header>
 
-    <div class="container">
+        <div class="container">
 
-        <div class="logo">
-            ⚽ <span>WORLD</span> FOOTBALL FORUM
+            <div class="logo">
+                ⚽ <span>WORLD</span> FOOTBALL FORUM
+            </div>
+
+            <nav>
+
+                <a href="/">Home</a>
+
+                <a href="/category/berita">
+                    Berita
+                </a>
+
+                <a href="/category/transfer">
+                    Transfer
+                </a>
+
+                <a href="/category/kompetisi">
+                    Kompetisi
+                </a>
+
+                <a href="/category/komunitas">
+                    Komunitas
+                </a>
+
+                <a href="/profile">
+                    👤 <%= user %>
+                </a>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            </nav>
+
         </div>
 
-        <nav>
-
-            <a href="/">
-                Home
-            </a>
-
-            <a href="/category/berita">
-                Berita
-            </a>
-
-            <a href="/category/transfer">
-                Transfer
-            </a>
-
-            <a href="/category/kompetisi">
-                Kompetisi
-            </a>
-
-            <a href="/category/komunitas">
-                Komunitas
-            </a>
-
-            <a href="/profile">
-                👤 <%= user %>
-            </a>
-
-            <a href="/logout">
-                Logout
-            </a>
-
-        </nav>
-
-    </div>
-
-</header>
+    </header>
 
 
-<!-- CONTENT -->
+    <!-- CONTENT -->
 
-<main class="container">
+    <main class="container">
 
-    <!-- PROFILE -->
+        <!-- JUDUL -->
 
-    <section class="hero">
+        <section class="hero">
 
-        <h1>
-            👤 Profil Pengguna
-        </h1>
-
-        <p>
-            Kelola akun World Football Forum kamu.
-        </p>
-
-    </section>
-
-
-    <!-- ACCOUNT INFORMATION -->
-
-    <section class="hero">
-
-        <h2>
-            Informasi Akun
-        </h2>
-
-        <br>
-
-        <p>
-            <strong>Username:</strong>
-            <%= user %>
-        </p>
-
-    </section>
-
-
-    <!-- CHANGE PASSWORD -->
-
-    <section class="hero">
-
-        <h2>
-            🔐 Ganti Password
-        </h2>
-
-        <br>
-
-        <form
-            action="/profile/change-password"
-            method="POST"
-        >
+            <h1>
+                👤 Profil Pengguna
+            </h1>
 
             <p>
-                <label for="currentPassword">
-                    Password Lama
-                </label>
+                Kelola akun World Football Forum kamu.
             </p>
 
-            <input
-                type="password"
-                id="currentPassword"
-                name="currentPassword"
-                minlength="6"
-                maxlength="72"
-                required
-                autocomplete="current-password"
-            >
+        </section>
 
+
+        <!-- INFORMASI AKUN -->
+
+        <section class="hero">
+
+            <h2>
+                Informasi Akun
+            </h2>
 
             <br>
-            <br>
-
 
             <p>
-                <label for="newPassword">
-                    Password Baru
-                </label>
+                <strong>Username:</strong>
+                <%= user %>
             </p>
 
-            <input
-                type="password"
-                id="newPassword"
-                name="newPassword"
-                minlength="6"
-                maxlength="72"
-                required
-                autocomplete="new-password"
-            >
+        </section>
 
 
-            <br>
-            <br>
+        <!-- STATISTIK -->
 
+        <section class="hero">
 
-            <p>
-                <label for="confirmPassword">
-                    Konfirmasi Password Baru
-                </label>
-            </p>
-
-            <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                minlength="6"
-                maxlength="72"
-                required
-                autocomplete="new-password"
-            >
-
+            <h2>
+                📊 Statistik
+            </h2>
 
             <br>
+
+            <div>
+
+                <p>
+                    📝
+                    <strong>
+                        Jumlah Thread:
+                    </strong>
+
+                    <%= threadCount %>
+                </p>
+
+                <br>
+
+                <p>
+                    💬
+                    <strong>
+                        Jumlah Komentar:
+                    </strong>
+
+                    <%= commentCount %>
+                </p>
+
+                <br>
+
+                <p>
+                    👁️
+                    <strong>
+                        Total Views:
+                    </strong>
+
+                    <%= totalViews %>
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- THREAD USER -->
+
+        <section class="hero">
+
+            <h2>
+                📝 Thread Saya
+            </h2>
+
             <br>
 
+            <% if (threads.length === 0) { %>
 
-            <button type="submit">
+                <p>
+                    Kamu belum membuat thread.
+                </p>
+
+            <% } else { %>
+
+                <% threads.forEach(thread => { %>
+
+                    <div>
+
+                        <h3>
+
+                            <a
+                                href="/thread/<%= thread.id %>"
+                            >
+                                <%= thread.title %>
+                            </a>
+
+                        </h3>
+
+                        <br>
+
+                        <p>
+
+                            📂
+                            <%= thread.category %>
+
+                            &nbsp; | &nbsp;
+
+                            📅
+                            <%= thread.date %>
+
+                            &nbsp; | &nbsp;
+
+                            💬
+                            <%= thread.comment_count %>
+                            komentar
+
+                            &nbsp; | &nbsp;
+
+                            👁️
+                            <%= thread.views %>
+                            views
+
+                        </p>
+
+                    </div>
+
+                    <hr>
+
+                    <br>
+
+                <% }) %>
+
+            <% } %>
+
+        </section>
+
+
+        <!-- GANTI PASSWORD -->
+
+        <section class="hero">
+
+            <h2>
                 🔐 Ganti Password
-            </button>
+            </h2>
 
-        </form>
+            <br>
 
-    </section>
+            <form
+                action="/profile/change-password"
+                method="POST"
+            >
 
-</main>
+                <p>
+
+                    <label for="currentPassword">
+                        Password Lama
+                    </label>
+
+                </p>
+
+                <input
+                    type="password"
+                    id="currentPassword"
+                    name="currentPassword"
+                    required
+                    autocomplete="current-password"
+                >
+
+                <br>
+                <br>
+
+                <p>
+
+                    <label for="newPassword">
+                        Password Baru
+                    </label>
+
+                </p>
+
+                <input
+                    type="password"
+                    id="newPassword"
+                    name="newPassword"
+                    minlength="6"
+                    maxlength="72"
+                    required
+                    autocomplete="new-password"
+                >
+
+                <br>
+                <br>
+
+                <p>
+
+                    <label for="confirmPassword">
+                        Konfirmasi Password Baru
+                    </label>
+
+                </p>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    minlength="6"
+                    maxlength="72"
+                    required
+                    autocomplete="new-password"
+                >
+
+                <br>
+                <br>
+
+                <button type="submit">
+                    🔐 Ganti Password
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
 
 
-<!-- FOOTER -->
+    <!-- FOOTER -->
 
-<footer>
+    <footer>
 
-    <p>
-        © 2026 World Football Forum
-    </p>
+        <p>
+            © 2026 World Football Forum
+        </p>
 
-    <p>
-        Forum komunitas sepakbola dunia
-    </p>
+        <p>
+            Forum komunitas sepakbola dunia
+        </p>
 
-</footer>
-```
+    </footer>
 
 </body>
 

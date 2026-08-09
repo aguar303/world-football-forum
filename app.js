@@ -945,57 +945,40 @@ app.get("/profile", async (req, res) => {
         const user = userResult.rows[0];
 
         // =================================================
-        // JUMLAH THREAD
+        // STATISTIK THREAD
         // =================================================
 
-        const threadCountResult = await pool.query(
+        const threadStatsResult = await pool.query(
             `
-            SELECT COUNT(*)::INTEGER AS total
+            SELECT
+                COUNT(*)::INTEGER AS thread_count,
+                COALESCE(SUM(views), 0)::INTEGER AS total_views
             FROM threads
             WHERE author = $1
             `,
             [user.username]
         );
 
-        const threadCount =
-            threadCountResult.rows[0].total;
+        const threadStats = threadStatsResult.rows[0];
 
         // =================================================
-        // TOTAL VIEWS THREAD USER
+        // STATISTIK KOMENTAR
         // =================================================
 
-        const viewsResult = await pool.query(
+        const commentStatsResult = await pool.query(
             `
-            SELECT COALESCE(SUM(views), 0)::INTEGER AS total
-            FROM threads
+            SELECT
+                COUNT(*)::INTEGER AS comment_count
+            FROM comments
             WHERE author = $1
             `,
             [user.username]
         );
 
-        const totalViews =
-            viewsResult.rows[0].total;
+        const commentStats = commentStatsResult.rows[0];
 
         // =================================================
-        // JUMLAH KOMENTAR DI THREAD USER
-        // =================================================
-
-        const commentCountResult = await pool.query(
-            `
-            SELECT COUNT(c.id)::INTEGER AS total
-            FROM comments c
-            INNER JOIN threads t
-                ON c.thread_id = t.id
-            WHERE t.author = $1
-            `,
-            [user.username]
-        );
-
-        const commentCount =
-            commentCountResult.rows[0].total;
-
-        // =================================================
-        // DAFTAR THREAD USER
+        // DAFTAR THREAD MILIK USER
         // =================================================
 
         const threadsResult = await pool.query(
@@ -1022,11 +1005,8 @@ app.get("/profile", async (req, res) => {
             [user.username]
         );
 
-        const threads =
-            threadsResult.rows;
-
         // =================================================
-        // TAMPILKAN PROFILE
+        // RENDER PROFILE
         // =================================================
 
         res.render("profile", {
@@ -1035,13 +1015,17 @@ app.get("/profile", async (req, res) => {
 
             userId: user.id,
 
-            threadCount: threadCount,
+            threadCount:
+                threadStats.thread_count,
 
-            commentCount: commentCount,
+            commentCount:
+                commentStats.comment_count,
 
-            totalViews: totalViews,
+            totalViews:
+                threadStats.total_views,
 
-            threads: threads
+            threads:
+                threadsResult.rows
 
         });
 

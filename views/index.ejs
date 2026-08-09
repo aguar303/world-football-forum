@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>World Football Forum</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<header>
+    <div class="container header-inner">
+
+        <div class="logo">
+            ⚽ <span>WORLD</span> FOOTBALL FORUM
+        </div>
+
+        <nav class="main-nav">
+
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/category/berita">Berita</a>
+                <a href="/category/transfer">Transfer</a>
+                <a href="/category/kompetisi">Kompetisi</a>
+                <a href="/category/komunitas">Komunitas</a>
+            </div>
+
+            <div class="user-nav">
+
+                <% if (user) { %>
+
+                    <span class="user-menu">
+                        👤 <%= user %>
+                    </span>
+
+                    <a href="/logout" class="logout-link">
+                        Logout
+                    </a>
+
+                <% } else { %>
+
+                    <a href="/login">
+                        Login
+                    </a>
+
+                <% } %>
+
+            </div>
+
+        </nav>
+
+    </div>
+</header>
+
+<!-- =====================================================
+     BREAKING NEWS
+===================================================== -->
+
+<section class="breaking-news-container">
+
+    <div class="breaking-news-label">
+        🔴 BREAKING NEWS
+    </div>
+
+    <div class="breaking-news-ticker">
+        <div class="breaking-news-text">
+            Persija resmi menjadi juara Liga Indonesia! • Update terbaru sepakbola dunia • Bursa transfer semakin panas!
+        </div>
+    </div>
+
+</section>
+
+
+<section class="banner-container">
+
+    <a href="#" class="banner-placeholder">
+        <span>📢</span>
+        <strong>PASANG BANNER IKLAN DI SINI</strong>
+        <small>728 × 90 px</small>
+    </a>
+
+    <a href="#" class="banner-placeholder">
+        <span>📢</span>
+        <strong>PASANG BANNER IKLAN DI SINI</strong>
+        <small>728 × 90 px</small>
+    </a>
+
+</section>
+
+<main class="container">
+
+    <section class="hero">
+
+        <h1>
+            ⚽ Selamat Datang di World Football Forum
+        </h1>
+
+        <p>
+            Tempat berdiskusi tentang sepakbola dunia,
+            berita, transfer, pertandingan, klub dan
+            pemain favoritmu.
+        </p>
+
+    </section>
+
+
+    <h2 class="section-title">
+        🌍 Kategori Sepakbola
+    </h2>
+
+
+    <div class="categories">
+
+        <a href="/category/berita" class="category">
+            📰 Berita Sepakbola
+        </a>
+
+        <a href="/category/transfer" class="category">
+            🔄 Transfer & Rumor
+        </a>
+
+        <a href="/category/kompetisi" class="category">
+            🏆 Kompetisi
+        </a>
+
+        <a href="/category/komunitas" class="category">
+            💬 Komunitas
+        </a>
+
+        <a href="/category/premier-league" class="category">
+            🇬🇧 Premier League
+        </a>
+
+        <a href="/category/la-liga" class="category">
+            🇪🇸 La Liga
+        </a>
+
+        <a href="/category/serie-a" class="category">
+            🇮🇹 Serie A
+        </a>
+
+        <a href="/category/bundesliga" class="category">
+            🇩🇪 Bundesliga
+        </a>
+
+        <a href="/category/ligue-1" class="category">
+            🇫🇷 Ligue 1
+        </a>
+
+        <a href="/category/champions-league" class="category">
+            🏆 Champions League
+        </a>
+
+        <a href="/category/world-cup" class="category">
+            🌎 World Cup
+        </a>
+         
+        <a href="/category/komunitas" class="category">
+            💬 Diskusi Umum
+        </a>
+    </div>
+
+
+    <h2 class="section-title">
+        🔥 Topik Terbaru
+    </h2>
+
+
+    <% if (threads && threads.length > 0) { %>
+
+        <% threads.forEach(thread => { %>
+
+            <section class="hero">
+
+                <h3>
+
+                    <a href="/thread/<%= thread.id %>">
+
+                        🔥 <%= thread.title %>
+
+                    </a>
+
+                </h3>
+
+                <p>
+                    <%= thread.content %>
+                </p>
+
+                <small>
+
+                    👤 <%= thread.author %>
+
+                    &nbsp; | &nbsp;
+
+                    📅 <%= thread.date %>
+
+                    &nbsp; | &nbsp;
+
+                    💬
+                    <%= thread.comments ? thread.comments.length : 0 %>
+                    komentar
+
+                    &nbsp; | &nbsp;
+
+                    👁
+                    <%= thread.views || 0 %>
+                    views
+
+                </small>
+
+            </section>
+
+        <% }) %>
+
+    <% } else { %>
+
+        <section class="hero">
+
+            <h3>
+                Belum ada topik
+            </h3>
+
+            <p>
+                Belum ada diskusi yang dibuat.
+            </p>
+
+        </section>
+
+    <% } %>
+
+</main>
+
+
+<footer>
+
+    <p>
+        © 2026 World Football Forum
+    </p>
+
+    <p>
+        Forum komunitas sepakbola dunia
+    </p>
+
+</footer>
+
+
+</body>
+</html>

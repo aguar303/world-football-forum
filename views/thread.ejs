@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><%= title %> - World Football Forum</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="container">
+
+        <div class="logo">
+            ⚽ <span>WORLD</span> FOOTBALL FORUM
+        </div>
+
+        <nav>
+
+            <a href="/">Home</a>
+
+            <a href="/category/berita">Berita</a>
+
+            <a href="/category/transfer">Transfer</a>
+
+            <a href="/category/kompetisi">Kompetisi</a>
+
+            <a href="/category/komunitas">Komunitas</a>
+
+            <% if (user) { %>
+
+                <span>
+                    👤 <%= user %>
+                </span>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            <% } else { %>
+
+                <a href="/login">
+                    Login
+                </a>
+
+            <% } %>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="container">
+
+    <a href="/">
+        ← Kembali ke Home
+    </a>
+
+
+    <article class="thread-detail">
+
+        <div class="thread-category">
+            ⚽ <%= category || "Diskusi Sepakbola" %>
+        </div>
+
+        <h1>
+            <%= title %>
+        </h1>
+
+
+        <div class="thread-meta">
+
+            👤 <strong><%= author %></strong>
+
+            &nbsp; | &nbsp;
+
+            📅 <%= date %>
+
+            &nbsp; | &nbsp;
+
+            👁 <%= views %> views
+
+            &nbsp; | &nbsp;
+
+            💬 <%= comments.length %> komentar
+
+        </div>
+
+
+        <div class="thread-content">
+    <%= content %>
+</div>
+
+
+        <% if (user === author) { %>
+
+            <form
+                action="/thread/<%= id %>/delete"
+                method="POST"
+                onsubmit="return confirm('Yakin ingin menghapus thread ini?');"
+            >
+
+                <button type="submit">
+                    🗑️ Hapus Thread
+                </button>
+
+            </form>
+
+        <% } %>
+
+    </article>
+
+
+    <section>
+
+        <h2>
+            💬 Komentar (<%= comments.length %>)
+        </h2>
+
+
+        <% if (user) { %>
+
+            <form
+                action="/thread/<%= id %>/comment"
+                method="POST"
+            >
+
+                <textarea
+                    name="comment"
+                    placeholder="Tulis komentar kamu..."
+                    required
+                ></textarea>
+
+                <br>
+
+                <button type="submit">
+                    🚀 Kirim Komentar
+                </button>
+
+            </form>
+
+        <% } else { %>
+
+            <p>
+
+                🔐 Silakan
+                <a href="/login">Login</a>
+                untuk memberikan komentar.
+
+            </p>
+
+        <% } %>
+
+
+        <% if (comments.length === 0) { %>
+
+            <p>
+                Belum ada komentar.
+            </p>
+
+        <% } else { %>
+
+
+            <% comments.forEach((comment, index) => { %>
+
+                <article class="comment-card">
+
+                    <h3>
+                        👤 <%= comment.author %>
+                    </h3>
+
+                    <small>
+                        📅 <%= comment.date %>
+                    </small>
+
+                    <p>
+                        <%= comment.text %>
+                    </p>
+
+
+                    <% if (user === comment.author) { %>
+
+                        <form
+                            action="/thread/<%= id %>/comment/delete/<%= index %>"
+                            method="POST"
+                            onsubmit="return confirm('Hapus komentar ini?');"
+                        >
+
+                            <button type="submit">
+                                🗑️ Hapus
+                            </button>
+
+                        </form>
+
+                    <% } %>
+
+                </article>
+
+            <% }) %>
+
+
+        <% } %>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <p>
+        © 2026 World Football Forum
+    </p>
+
+    <p>
+        Forum komunitas sepakbola dunia
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

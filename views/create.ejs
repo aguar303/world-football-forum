@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Buat Topik Baru - World Football Forum</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header>
+
+    <div class="container">
+
+        <div class="logo">
+            ⚽ <span>WORLD</span> FOOTBALL FORUM
+        </div>
+
+        <nav>
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/category/berita">
+                Berita
+            </a>
+
+            <a href="/category/transfer">
+                Transfer
+            </a>
+
+            <a href="/category/kompetisi">
+                Kompetisi
+            </a>
+
+            <a href="/category/komunitas">
+                Komunitas
+            </a>
+
+            <% if (user) { %>
+
+                <span>
+                    👤 <%= user %>
+                </span>
+
+                <a href="/logout">
+                    Logout
+                </a>
+
+            <% } else { %>
+
+                <a href="/login">
+                    Login
+                </a>
+
+            <% } %>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<!-- CONTENT -->
+
+<main class="container">
+
+    <section class="hero">
+
+        <h1>
+            📝 Buat Topik Baru
+        </h1>
+
+        <p>
+            Buat diskusi baru dan bagikan pendapatmu
+            kepada komunitas sepakbola dunia.
+        </p>
+
+    </section>
+
+
+    <section class="hero">
+
+        <form action="/create" method="POST">
+
+            <!-- JUDUL -->
+
+            <label for="title">
+                Judul Diskusi
+            </label>
+
+            <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="Contoh: Arsenal bisa juara musim ini?"
+                required
+            >
+
+
+            <!-- KATEGORI -->
+
+            <label for="category">
+                📂 Kategori
+            </label>
+
+            <select
+                id="category"
+                name="category"
+                required
+            >
+
+                <option value="">
+                    -- Pilih Kategori --
+                </option>
+
+                <optgroup label="📰 Berita">
+
+                    <option value="berita">
+                        📰 Berita Sepakbola
+                    </option>
+
+                </optgroup>
+
+
+                <optgroup label="🔄 Transfer">
+
+                    <option value="transfer">
+                        🔄 Transfer & Rumor
+                    </option>
+
+                </optgroup>
+
+
+                <optgroup label="🏆 Kompetisi">
+
+                    <option value="kompetisi">
+                        🏆 Kompetisi Umum
+                    </option>
+
+                    <option value="premier-league">
+                        🇬🇧 Premier League
+                    </option>
+
+                    <option value="la-liga">
+                        🇪🇸 La Liga
+                    </option>
+
+                    <option value="serie-a">
+                        🇮🇹 Serie A
+                    </option>
+
+                    <option value="bundesliga">
+                        🇩🇪 Bundesliga
+                    </option>
+
+                    <option value="ligue-1">
+                        🇫🇷 Ligue 1
+                    </option>
+
+                    <option value="champions-league">
+                        🏆 Champions League
+                    </option>
+
+                    <option value="world-cup">
+                        🌎 World Cup
+                    </option>
+
+                </optgroup>
+
+
+                <optgroup label="💬 Komunitas">
+
+                    <option value="komunitas">
+                        💬 Diskusi Umum
+                    </option>
+
+                </optgroup>
+
+            </select>
+
+
+            <!-- ISI -->
+
+            <label for="content">
+                Isi Diskusi
+            </label>
+
+            <textarea
+                id="content"
+                name="content"
+                rows="8"
+                placeholder="Tulis pendapat kamu..."
+                required
+            ></textarea>
+
+
+            <!-- BUTTON -->
+
+            <button type="submit">
+                🚀 Posting
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <p>
+        © 2026 World Football Forum
+    </p>
+
+    <p>
+        Forum komunitas sepakbola dunia
+    </p>
+
+</footer>
+
+</body>
+
+</html>

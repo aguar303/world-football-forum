@@ -923,28 +923,126 @@ app.get("/profile", async (req, res) => {
             return res.redirect("/login");
         }
 
-        const result =
-            await pool.query(
-                `
-                SELECT
-                    id,
-                    username
-                FROM users
-                WHERE id = $1
-                `,
-                [req.session.userId]
-            );
+        // =================================================
+        // DATA USER
+        // =================================================
 
-        if (result.rows.length === 0) {
+        const userResult = await pool.query(
+            `
+            SELECT
+                id,
+                username
+            FROM users
+            WHERE id = $1
+            `,
+            [req.session.userId]
+        );
+
+        if (userResult.rows.length === 0) {
             return res.redirect("/logout");
         }
 
-        const user =
-            result.rows[0];
+        const user = userResult.rows[0];
+
+        // =================================================
+        // JUMLAH THREAD
+        // =================================================
+
+        const threadCountResult = await pool.query(
+            `
+            SELECT COUNT(*)::INTEGER AS total
+            FROM threads
+            WHERE author = $1
+            `,
+            [user.username]
+        );
+
+        const threadCount =
+            threadCountResult.rows[0].total;
+
+        // =================================================
+        // TOTAL VIEWS THREAD USER
+        // =================================================
+
+        const viewsResult = await pool.query(
+            `
+            SELECT COALESCE(SUM(views), 0)::INTEGER AS total
+            FROM threads
+            WHERE author = $1
+            `,
+            [user.username]
+        );
+
+        const totalViews =
+            viewsResult.rows[0].total;
+
+        // =================================================
+        // JUMLAH KOMENTAR DI THREAD USER
+        // =================================================
+
+        const commentCountResult = await pool.query(
+            `
+            SELECT COUNT(c.id)::INTEGER AS total
+            FROM comments c
+            INNER JOIN threads t
+                ON c.thread_id = t.id
+            WHERE t.author = $1
+            `,
+            [user.username]
+        );
+
+        const commentCount =
+            commentCountResult.rows[0].total;
+
+        // =================================================
+        // DAFTAR THREAD USER
+        // =================================================
+
+        const threadsResult = await pool.query(
+            `
+            SELECT
+                t.id,
+                t.title,
+                t.category,
+                t.date,
+                t.views,
+                COUNT(c.id)::INTEGER AS comment_count
+            FROM threads t
+            LEFT JOIN comments c
+                ON c.thread_id = t.id
+            WHERE t.author = $1
+            GROUP BY
+                t.id,
+                t.title,
+                t.category,
+                t.date,
+                t.views
+            ORDER BY t.id DESC
+            `,
+            [user.username]
+        );
+
+        const threads =
+            threadsResult.rows;
+
+        // =================================================
+        // TAMPILKAN PROFILE
+        // =================================================
 
         res.render("profile", {
+
             user: user.username,
-            userId: user.id
+
+            userId: user.id,
+
+            threadCount: threadCount,
+
+            commentCount: commentCount,
+
+            totalViews: totalViews,
+
+            threads: threads
+
         });
 
     } catch (error) {

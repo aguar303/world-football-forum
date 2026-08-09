@@ -47,6 +47,7 @@ app.use(
         cookie: {
             secure: process.env.NODE_ENV === "production",
             httpOnly: true,
+            sameSite: "lax",
             maxAge: 1000 * 60 * 60 * 24 * 7
         }
     })
@@ -75,6 +76,21 @@ const VALID_CATEGORIES = [
 ];
 
 // =====================================================
+// HELPER - CEK BCRYPT
+// =====================================================
+
+function isBcryptHash(password) {
+    return (
+        typeof password === "string" &&
+        (
+            password.startsWith("$2a$") ||
+            password.startsWith("$2b$") ||
+            password.startsWith("$2y$")
+        )
+    );
+}
+
+// =====================================================
 // DATABASE SETUP
 // =====================================================
 
@@ -91,6 +107,10 @@ async function initDatabase() {
 
     try {
 
+        // =================================================
+        // USERS
+        // =================================================
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id BIGINT PRIMARY KEY,
@@ -98,6 +118,10 @@ async function initDatabase() {
                 password TEXT NOT NULL
             )
         `);
+
+        // =================================================
+        // THREADS
+        // =================================================
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS threads (
@@ -110,6 +134,10 @@ async function initDatabase() {
                 views INTEGER DEFAULT 0
             )
         `);
+
+        // =================================================
+        // COMMENTS
+        // =================================================
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS comments (
@@ -160,23 +188,18 @@ async function initDatabase() {
             );
 
             console.log(
-                "User dodo berhasil dibuat dengan password aman."
+                "User dodo berhasil dibuat dengan password bcrypt."
             );
 
         } else {
 
-            const user =
-                existingUser.rows[0];
+            const user = existingUser.rows[0];
 
             // =================================================
-            // MIGRASI PASSWORD LAMA
+            // MIGRASI PASSWORD DODO JIKA MASIH PLAINTEXT
             // =================================================
 
-            if (
-                !user.password.startsWith("$2a$") &&
-                !user.password.startsWith("$2b$") &&
-                !user.password.startsWith("$2y$")
-            ) {
+            if (!isBcryptHash(user.password)) {
 
                 const hashedPassword =
                     await bcrypt.hash(
@@ -207,7 +230,6 @@ async function initDatabase() {
                 );
 
             }
-
         }
 
     } catch (error) {
@@ -216,7 +238,6 @@ async function initDatabase() {
             "DATABASE ERROR:",
             error
         );
-
     }
 }
 
@@ -275,7 +296,6 @@ app.get("/", async (req, res) => {
         res.status(500).send(
             "Terjadi kesalahan pada database."
         );
-
     }
 });
 
@@ -295,7 +315,6 @@ app.get("/category/:name", async (req, res) => {
             return res.status(404).send(
                 "Kategori tidak ditemukan."
             );
-
         }
 
         const result = await pool.query(
@@ -347,7 +366,6 @@ app.get("/category/:name", async (req, res) => {
         res.status(500).send(
             "Terjadi kesalahan pada database."
         );
-
     }
 });
 
@@ -360,7 +378,6 @@ app.get("/create", (req, res) => {
     if (!req.session.username) {
 
         return res.redirect("/login");
-
     }
 
     res.render("create", {
@@ -370,7 +387,6 @@ app.get("/create", (req, res) => {
         categories: VALID_CATEGORIES
 
     });
-
 });
 
 // =====================================================
@@ -384,7 +400,6 @@ app.post("/create", async (req, res) => {
         if (!req.session.username) {
 
             return res.redirect("/login");
-
         }
 
         const title =
@@ -403,7 +418,6 @@ app.post("/create", async (req, res) => {
             return res.send(
                 "Judul thread wajib diisi."
             );
-
         }
 
         if (!content) {
@@ -411,7 +425,6 @@ app.post("/create", async (req, res) => {
             return res.send(
                 "Isi thread wajib diisi."
             );
-
         }
 
         if (!VALID_CATEGORIES.includes(category)) {
@@ -419,7 +432,6 @@ app.post("/create", async (req, res) => {
             return res.send(
                 "Kategori tidak valid."
             );
-
         }
 
         const threadId = Date.now();
@@ -458,7 +470,6 @@ app.post("/create", async (req, res) => {
         res.status(500).send(
             "Gagal membuat thread."
         );
-
     }
 });
 
@@ -492,7 +503,6 @@ app.get("/thread/:id", async (req, res) => {
             return res.send(
                 "Thread tidak ditemukan."
             );
-
         }
 
         const thread =
@@ -557,7 +567,6 @@ app.get("/thread/:id", async (req, res) => {
         res.status(500).send(
             "Gagal membuka thread."
         );
-
     }
 });
 
@@ -572,7 +581,6 @@ app.post("/thread/:id/comment", async (req, res) => {
         if (!req.session.username) {
 
             return res.redirect("/login");
-
         }
 
         const threadResult =
@@ -586,7 +594,6 @@ app.post("/thread/:id/comment", async (req, res) => {
             return res.send(
                 "Thread tidak ditemukan."
             );
-
         }
 
         const commentText =
@@ -597,7 +604,6 @@ app.post("/thread/:id/comment", async (req, res) => {
             return res.send(
                 "Komentar tidak boleh kosong."
             );
-
         }
 
         await pool.query(
@@ -628,7 +634,6 @@ app.post("/thread/:id/comment", async (req, res) => {
         res.status(500).send(
             "Gagal menambahkan komentar."
         );
-
     }
 });
 
@@ -645,7 +650,6 @@ app.post(
             if (!req.session.username) {
 
                 return res.redirect("/login");
-
             }
 
             const commentsResult =
@@ -663,7 +667,8 @@ app.post(
 
             const commentIndex =
                 parseInt(
-                    req.params.commentIndex
+                    req.params.commentIndex,
+                    10
                 );
 
             if (
@@ -675,7 +680,6 @@ app.post(
                 return res.send(
                     "Komentar tidak ditemukan."
                 );
-
             }
 
             const comment =
@@ -689,7 +693,6 @@ app.post(
                 return res.status(403).send(
                     "Kamu tidak boleh menghapus komentar ini."
                 );
-
             }
 
             await pool.query(
@@ -714,9 +717,7 @@ app.post(
             res.status(500).send(
                 "Gagal menghapus komentar."
             );
-
         }
-
     }
 );
 
@@ -731,7 +732,6 @@ app.post("/thread/:id/delete", async (req, res) => {
         if (!req.session.username) {
 
             return res.redirect("/login");
-
         }
 
         const result =
@@ -749,7 +749,6 @@ app.post("/thread/:id/delete", async (req, res) => {
             return res.send(
                 "Thread tidak ditemukan."
             );
-
         }
 
         const thread =
@@ -763,7 +762,6 @@ app.post("/thread/:id/delete", async (req, res) => {
             return res.status(403).send(
                 "Kamu tidak boleh menghapus thread ini."
             );
-
         }
 
         await pool.query(
@@ -786,7 +784,6 @@ app.post("/thread/:id/delete", async (req, res) => {
         res.status(500).send(
             "Gagal menghapus thread."
         );
-
     }
 });
 
@@ -797,7 +794,6 @@ app.post("/thread/:id/delete", async (req, res) => {
 app.get("/login", (req, res) => {
 
     res.render("login");
-
 });
 
 // =====================================================
@@ -813,6 +809,13 @@ app.post("/login", async (req, res) => {
 
         const password =
             String(req.body.password || "");
+
+        if (!username || !password) {
+
+            return res.send(
+                "Username dan password wajib diisi."
+            );
+        }
 
         const result =
             await pool.query(
@@ -832,25 +835,72 @@ app.post("/login", async (req, res) => {
             return res.send(
                 "Username atau password salah."
             );
-
         }
 
         const user =
             result.rows[0];
 
-        const passwordMatch =
-            await bcrypt.compare(
-                password,
-                user.password
-            );
+        // =================================================
+        // PASSWORD BCRYPT
+        // =================================================
+
+        let passwordMatch = false;
+
+        if (isBcryptHash(user.password)) {
+
+            passwordMatch =
+                await bcrypt.compare(
+                    password,
+                    user.password
+                );
+
+        } else {
+
+            // =================================================
+            // MIGRASI PASSWORD LAMA
+            // =================================================
+            // Jika password lama masih plaintext,
+            // cek terlebih dahulu lalu langsung hash.
+
+            passwordMatch =
+                password === user.password;
+
+            if (passwordMatch) {
+
+                const hashedPassword =
+                    await bcrypt.hash(
+                        password,
+                        12
+                    );
+
+                await pool.query(
+                    `
+                    UPDATE users
+                    SET password = $1
+                    WHERE id = $2
+                    `,
+                    [
+                        hashedPassword,
+                        user.id
+                    ]
+                );
+
+                console.log(
+                    "Password user lama berhasil dimigrasikan ke bcrypt."
+                );
+            }
+        }
 
         if (!passwordMatch) {
 
             return res.send(
                 "Username atau password salah."
             );
-
         }
+
+        // =================================================
+        // SESSION
+        // =================================================
 
         req.session.userId =
             user.id;
@@ -862,7 +912,7 @@ app.post("/login", async (req, res) => {
 
             if (err) {
 
-                console.log(
+                console.error(
                     "SESSION ERROR:",
                     err
                 );
@@ -870,7 +920,6 @@ app.post("/login", async (req, res) => {
                 return res.send(
                     "Session gagal disimpan."
                 );
-
             }
 
             console.log(
@@ -879,8 +928,7 @@ app.post("/login", async (req, res) => {
             );
 
             console.log(
-                "SESSION ID:",
-                req.sessionID
+                "SESSION BERHASIL"
             );
 
             res.redirect("/");
@@ -897,7 +945,6 @@ app.post("/login", async (req, res) => {
         res.status(500).send(
             "Gagal login."
         );
-
     }
 });
 
@@ -911,7 +958,7 @@ app.get("/logout", (req, res) => {
 
         if (err) {
 
-            console.log(
+            console.error(
                 "LOGOUT ERROR:",
                 err
             );
@@ -919,13 +966,11 @@ app.get("/logout", (req, res) => {
             return res.send(
                 "Gagal logout."
             );
-
         }
 
         res.redirect("/");
 
     });
-
 });
 
 // =====================================================
@@ -935,7 +980,6 @@ app.get("/logout", (req, res) => {
 app.get("/register", (req, res) => {
 
     res.render("register");
-
 });
 
 // =====================================================
@@ -960,7 +1004,20 @@ app.post("/register", async (req, res) => {
             return res.send(
                 "Username wajib diisi."
             );
+        }
 
+        if (username.length < 3) {
+
+            return res.send(
+                "Username minimal 3 karakter."
+            );
+        }
+
+        if (username.length > 100) {
+
+            return res.send(
+                "Username terlalu panjang."
+            );
         }
 
         if (!password) {
@@ -968,7 +1025,6 @@ app.post("/register", async (req, res) => {
             return res.send(
                 "Password wajib diisi."
             );
-
         }
 
         if (password.length < 6) {
@@ -976,7 +1032,13 @@ app.post("/register", async (req, res) => {
             return res.send(
                 "Password minimal 6 karakter."
             );
+        }
 
+        if (password.length > 72) {
+
+            return res.send(
+                "Password maksimal 72 karakter."
+            );
         }
 
         if (password !== confirmPassword) {
@@ -984,7 +1046,6 @@ app.post("/register", async (req, res) => {
             return res.send(
                 "Password dan konfirmasi password tidak sama."
             );
-
         }
 
         const existingUser =
@@ -1002,11 +1063,14 @@ app.post("/register", async (req, res) => {
             return res.send(
                 "Username sudah digunakan."
             );
-
         }
 
         const newUserId =
             Date.now();
+
+        // =================================================
+        // HASH PASSWORD DENGAN BCRYPT
+        // =================================================
 
         const hashedPassword =
             await bcrypt.hash(
@@ -1027,6 +1091,11 @@ app.post("/register", async (req, res) => {
             ]
         );
 
+        console.log(
+            "USER REGISTER:",
+            username
+        );
+
         res.redirect("/login");
 
     } catch (error) {
@@ -1039,7 +1108,6 @@ app.post("/register", async (req, res) => {
         res.status(500).send(
             "Gagal melakukan registrasi."
         );
-
     }
 });
 
@@ -1071,7 +1139,6 @@ app.get("/db-test", async (req, res) => {
         res.status(500).send(
             "DATABASE ERROR"
         );
-
     }
 });
 
@@ -1094,7 +1161,6 @@ async function startServer() {
 
         }
     );
-
 }
 
 startServer();

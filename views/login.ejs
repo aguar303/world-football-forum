@@ -34,6 +34,14 @@
 
             <p>Silakan login untuk melanjutkan.</p>
 
+            <% if (error) { %>
+
+    <div class="login-error">
+        ⚠️ <%= error %>
+    </div>
+
+<% } %>
+
             <form action="/login" method="POST">
 
                 <div class="form-group">

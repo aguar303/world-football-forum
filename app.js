@@ -724,10 +724,10 @@ app.post("/thread/:id/delete", async (req, res) => {
 
         if (result.rows.length === 0) {
 
-            return res.send(
-                "Thread tidak ditemukan."
-            );
-        }
+    return res.render("login", {
+        error: "Username atau password salah."
+    });
+}
 
         const thread =
             result.rows[0];
@@ -861,10 +861,10 @@ app.post("/login", async (req, res) => {
 
         if (!passwordMatch) {
 
-            return res.send(
-                "Username atau password salah."
-            );
-        }
+    return res.render("login", {
+        error: "Username atau password salah."
+    });
+}
 
         req.session.userId =
             user.id;

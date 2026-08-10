@@ -51,9 +51,9 @@
                     Komunitas
                 </a>
 
-                <a href="/profile">
+                <span>
                     👤 <%= user %>
-                </a>
+                </span>
 
                 <a href="/logout">
                     Logout
@@ -70,7 +70,7 @@
 
     <main class="container">
 
-        <!-- JUDUL -->
+        <!-- PROFIL -->
 
         <section class="hero">
 
@@ -85,141 +85,132 @@
         </section>
 
 
-        <!-- INFORMASI AKUN -->
+       <!-- INFORMASI AKUN -->
+<section class="hero">
 
-        <section class="hero">
+    <h2>Informasi Akun</h2>
 
-            <h2>
-                Informasi Akun
-            </h2>
+    <br>
 
-            <br>
+    <p>
+        <strong>Username:</strong>
+        <%= user %>
+    </p>
 
-            <p>
-                <strong>Username:</strong>
-                <%= user %>
-            </p>
-
-        </section>
+</section>
 
 
-        <!-- STATISTIK -->
+<!-- STATISTIK -->
+<section class="hero">
 
-        <section class="hero">
+    <h2>📊 Statistik</h2>
 
-            <h2>
-                📊 Statistik
-            </h2>
+    <div class="profile-stats">
 
-            <br>
+        <div class="profile-stat-card">
 
-            <div>
-
-                <p>
-                    📝
-                    <strong>
-                        Jumlah Thread:
-                    </strong>
-
-                    <%= threadCount %>
-                </p>
-
-                <br>
-
-                <p>
-                    💬
-                    <strong>
-                        Jumlah Komentar:
-                    </strong>
-
-                    <%= commentCount %>
-                </p>
-
-                <br>
-
-                <p>
-                    👁️
-                    <strong>
-                        Total Views:
-                    </strong>
-
-                    <%= totalViews %>
-                </p>
-
+            <div class="profile-stat-icon">
+                📝
             </div>
 
-        </section>
+            <div class="profile-stat-number">
+                <%= threadCount %>
+            </div>
+
+            <div class="profile-stat-label">
+                Jumlah Thread
+            </div>
+
+        </div>
 
 
-        <!-- THREAD USER -->
+        <div class="profile-stat-card">
 
-        <section class="hero">
+            <div class="profile-stat-icon">
+                💬
+            </div>
 
-            <h2>
-                📝 Thread Saya
-            </h2>
+            <div class="profile-stat-number">
+                <%= commentCount %>
+            </div>
 
-            <br>
+            <div class="profile-stat-label">
+                Jumlah Komentar
+            </div>
 
-            <% if (threads.length === 0) { %>
+        </div>
 
-                <p>
-                    Kamu belum membuat thread.
-                </p>
 
-            <% } else { %>
+        <div class="profile-stat-card">
 
-                <% threads.forEach(thread => { %>
+            <div class="profile-stat-icon">
+                👁️
+            </div>
 
-                    <div>
+            <div class="profile-stat-number">
+                <%= totalViews %>
+            </div>
 
-                        <h3>
+            <div class="profile-stat-label">
+                Total Views
+            </div>
 
-                            <a
-                                href="/thread/<%= thread.id %>"
-                            >
-                                <%= thread.title %>
-                            </a>
+        </div>
 
-                        </h3>
+    </div>
 
-                        <br>
+</section>
 
-                        <p>
 
-                            📂
-                            <%= thread.category %>
+<!-- THREAD SAYA -->
+<section class="hero">
 
-                            &nbsp; | &nbsp;
+    <h2>📝 Thread Saya</h2>
 
-                            📅
-                            <%= thread.date %>
+    <% if (myThreads.length === 0) { %>
 
-                            &nbsp; | &nbsp;
+        <p style="margin-top: 20px;">
+            Kamu belum membuat thread.
+        </p>
 
-                            💬
-                            <%= thread.comment_count %>
-                            komentar
+    <% } else { %>
 
-                            &nbsp; | &nbsp;
+        <div class="profile-thread-list">
 
-                            👁️
-                            <%= thread.views %>
-                            views
+            <% myThreads.forEach(thread => { %>
 
-                        </p>
+                <div class="profile-thread-card">
+
+                    <h3>
+                        <a href="/thread/<%= thread.id %>">
+                            <%= thread.title %>
+                        </a>
+                    </h3>
+
+                    <div class="profile-thread-meta">
+
+                        📂 <%= thread.category %>
+                        &nbsp; | &nbsp;
+
+                        📅 <%= thread.date %>
+                        &nbsp; | &nbsp;
+
+                        💬 <%= thread.comment_count %> komentar
+                        &nbsp; | &nbsp;
+
+                        👁️ <%= thread.views %> views
 
                     </div>
 
-                    <hr>
+                </div>
 
-                    <br>
+            <% }) %>
 
-                <% }) %>
+        </div>
 
-            <% } %>
+    <% } %>
 
-        </section>
+</section>
 
 
         <!-- GANTI PASSWORD -->

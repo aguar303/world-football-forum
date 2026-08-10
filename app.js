@@ -924,7 +924,7 @@ app.get("/profile", async (req, res) => {
         }
 
         // =================================================
-        // DATA USER
+        // USER
         // =================================================
 
         const userResult = await pool.query(
@@ -959,8 +959,6 @@ app.get("/profile", async (req, res) => {
             [user.username]
         );
 
-        const threadStats = threadStatsResult.rows[0];
-
         // =================================================
         // STATISTIK KOMENTAR
         // =================================================
@@ -975,10 +973,8 @@ app.get("/profile", async (req, res) => {
             [user.username]
         );
 
-        const commentStats = commentStatsResult.rows[0];
-
         // =================================================
-        // DAFTAR THREAD MILIK USER
+        // THREAD MILIK USER
         // =================================================
 
         const threadsResult = await pool.query(
@@ -1006,6 +1002,22 @@ app.get("/profile", async (req, res) => {
         );
 
         // =================================================
+        // DATA STATISTIK
+        // =================================================
+
+        const threadCount =
+            threadStatsResult.rows[0].thread_count;
+
+        const totalViews =
+            threadStatsResult.rows[0].total_views;
+
+        const commentCount =
+            commentStatsResult.rows[0].comment_count;
+
+        const myThreads =
+            threadsResult.rows;
+
+        // =================================================
         // RENDER PROFILE
         // =================================================
 
@@ -1015,17 +1027,13 @@ app.get("/profile", async (req, res) => {
 
             userId: user.id,
 
-            threadCount:
-                threadStats.thread_count,
+            threadCount,
 
-            commentCount:
-                commentStats.comment_count,
+            commentCount,
 
-            totalViews:
-                threadStats.total_views,
+            totalViews,
 
-            threads:
-                threadsResult.rows
+            myThreads
 
         });
 
@@ -1118,6 +1126,11 @@ app.post(
                     `,
                     [req.session.userId]
                 );
+
+                   await pool.query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS avatar TEXT
+`);
 
             if (result.rows.length === 0) {
                 return res.redirect("/logout");

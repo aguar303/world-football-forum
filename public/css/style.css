@@ -1357,3 +1357,90 @@ footer p:first-child {
     border-color: var(--maroon);
     transform: translateY(-1px);
 }
+/* =========================================================
+   PROFILE - STATISTICS
+   ========================================================= */
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.profile-stat-card {
+    padding: 25px 20px;
+    border-radius: 12px;
+    text-align: center;
+    background: #ffffff;
+    border: 2px solid #ddd;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.profile-stat-icon {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.profile-stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.profile-stat-label {
+    font-size: 15px;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+
+/* =========================================================
+   PROFILE - THREAD LIST
+   ========================================================= */
+
+.profile-thread-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.profile-thread-card {
+    padding: 20px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.profile-thread-card h3 {
+    margin-bottom: 10px;
+}
+
+.profile-thread-card h3 a {
+    text-decoration: none;
+}
+
+.profile-thread-meta {
+    font-size: 14px;
+    opacity: 0.75;
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   PROFILE - MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-stat-card {
+        padding: 20px;
+    }
+
+}

@@ -1,7 +1,7 @@
 {
   "name": "forum",
   "version": "1.0.0",
-  "description": "World Football Forum",
+  "description": "Forum Sahabat Bola",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"

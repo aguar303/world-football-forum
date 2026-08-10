@@ -2,166 +2,235 @@
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title><%= category %> - World Football Forum</title>
+    <title>
+        <%= category %> - World Football Forum
+    </title>
 
-    <link rel="stylesheet" href="/css/style.css">
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
 </head>
+
 
 <body>
 
-<!-- HEADER -->
-<header>
-    <div class="container header-inner">
 
-        <div class="logo">
-            ⚽ <span>WORLD</span> FOOTBALL FORUM
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
+
+<header>
+
+    <div class="logo">
+        ⚽ <span>WORLD</span> FOOTBALL FORUM
+    </div>
+
+
+    <nav class="main-nav">
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/category/berita">
+                Berita
+            </a>
+
+            <a href="/category/transfer">
+                Transfer
+            </a>
+
+            <a href="/category/kompetisi">
+                Kompetisi
+            </a>
+
+            <a href="/category/komunitas">
+                Komunitas
+            </a>
+
         </div>
 
-        <nav class="main-nav">
 
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/category/berita">Berita</a>
-                <a href="/category/transfer">Transfer</a>
-                <a href="/category/kompetisi">Kompetisi</a>
-                <a href="/category/komunitas">Komunitas</a>
-            </div>
+        <div class="user-nav">
 
-            <div class="user-nav">
+            <% if (user) { %>
 
-                <% if (user) { %>
+                <span class="user-menu">
+                    👤 <%= user %>
+                </span>
 
-                    <span class="user-menu">
-                        👤 <%= user %>
-                    </span>
+                <a
+                    href="/logout"
+                    class="logout-link"
+                >
+                    Logout
+                </a>
 
-                    <a href="/logout" class="logout-link">
-                        Logout
-                    </a>
+            <% } else { %>
 
-                <% } else { %>
+                <a href="/login">
+                    Login
+                </a>
 
-                    <a href="/login">
-                        Login
-                    </a>
+            <% } %>
 
-                <% } %>
+        </div>
 
-            </div>
+    </nav>
 
-        </nav>
-
-    </div>
 </header>
 
 
-<!-- CONTENT -->
-<main class="container">
+<!-- =====================================================
+     CATEGORY HERO
+     ===================================================== -->
 
-    <section class="hero">
+<section class="hero">
 
-        <h1 class="category-title">
-            ⚽ <%= category %>
-        </h1>
+    <h1 class="category-title">
+
+        ⚽ <%= category %>
+
+    </h1>
+
+
+    <p>
+
+        Diskusi seputar berita, pertandingan,
+        pemain, dan klub di kategori ini.
+
+    </p>
+
+</section>
+
+
+<!-- =====================================================
+     BUAT TOPIK
+     ===================================================== -->
+
+<% if (user) { %>
+
+    <p style="margin-top: 20px;">
+
+        <a
+            href="/create"
+            class="create-button"
+        >
+
+            ➕ Buat Topik Baru
+
+        </a>
+
+    </p>
+
+<% } %>
+
+
+<!-- =====================================================
+     TOPIK TERBARU
+     ===================================================== -->
+
+<h2 class="section-title">
+
+    🔥 Topik Terbaru
+
+</h2>
+
+
+<% if (!threads || threads.length === 0) { %>
+
+
+    <div class="hero">
+
+        <h3>
+
+            Belum ada topik
+
+        </h3>
+
 
         <p>
-            Diskusi seputar berita, pertandingan,
-            pemain, dan klub di kategori ini.
-        </p>
 
-    </section>
-
-
-    <!-- BUAT TOPIK -->
-    <% if (user) { %>
-
-        <p style="margin-top: 20px;">
-
-            <a href="/create" class="create-button">
-                ➕ Buat Topik Baru
-            </a>
+            Belum ada diskusi di kategori ini.
 
         </p>
 
-    <% } %>
+    </div>
 
 
-    <!-- TOPIK -->
-    <h2 class="section-title">
-        🔥 Topik Terbaru
-    </h2>
+<% } else { %>
 
 
-    <% if (!threads || threads.length === 0) { %>
+    <% threads.forEach(thread => { %>
+
 
         <div class="hero">
 
             <h3>
-                Belum ada topik
+
+                <a
+                    href="/thread/<%= thread.id %>"
+                >
+
+                    🔥 <%= thread.title %>
+
+                </a>
+
             </h3>
 
+
             <p>
-                Belum ada diskusi di kategori ini.
+
+                <%= thread.content %>
+
             </p>
+
+
+            <small>
+
+                👤 <%= thread.author %>
+
+                &nbsp; | &nbsp;
+
+                📅 <%= thread.date || "-" %>
+
+                &nbsp; | &nbsp;
+
+                💬 <%= thread.comment_count || 0 %>
+                komentar
+
+                &nbsp; | &nbsp;
+
+                👁 <%= thread.views || 0 %>
+                views
+
+            </small>
 
         </div>
 
-    <% } else { %>
+
+    <% }) %>
 
 
-        <% threads.forEach(thread => { %>
-
-            <div class="hero">
-
-                <h3>
-
-                    <a href="/thread/<%= thread.id %>">
-
-                        🔥 <%= thread.title %>
-
-                    </a>
-
-                </h3>
+<% } %>
 
 
-                <p>
-                    <%= thread.content %>
-                </p>
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
 
-
-                <small>
-
-                    👤 <%= thread.author %>
-
-                    &nbsp; | &nbsp;
-
-                    📅 <%= thread.date || "-" %>
-
-                    &nbsp; | &nbsp;
-
-                    💬 <%= thread.replies ? thread.replies.length : 0 %> komentar
-
-                    &nbsp; | &nbsp;
-
-                    👁 <%= thread.views || 0 %> views
-
-                </small>
-
-            </div>
-
-        <% }) %>
-
-
-    <% } %>
-
-</main>
-
-
-<!-- FOOTER -->
 <footer>
 
     <p>
@@ -173,6 +242,7 @@
     </p>
 
 </footer>
+
 
 </body>
 

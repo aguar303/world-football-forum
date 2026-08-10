@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Profil - World Football Forum</title>
+    <title>Profil - Forum Sahabat Bola</title>
 
     <link
         rel="stylesheet"
@@ -21,298 +21,425 @@
 
 <body>
 
-    <!-- HEADER -->
 
-    <header>
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
 
-        <div class="container">
+<header>
 
-            <div class="logo">
-                ⚽ <span>WORLD</span> FOOTBALL FORUM
-            </div>
+    <div class="container">
 
-            <nav>
-
-                <a href="/">Home</a>
-
-                <a href="/category/berita">
-                    Berita
-                </a>
-
-                <a href="/category/transfer">
-                    Transfer
-                </a>
-
-                <a href="/category/kompetisi">
-                    Kompetisi
-                </a>
-
-                <a href="/category/komunitas">
-                    Komunitas
-                </a>
-
-                <span>
-                    👤 <%= user %>
-                </span>
-
-                <a href="/logout">
-                    Logout
-                </a>
-
-            </nav>
-
+        <div class="logo">
+            ⚽ <span>FORUM</span> SAHABAT BOLA
         </div>
 
-    </header>
+        <nav>
 
+            <a href="/">
+                Home
+            </a>
 
-    <!-- CONTENT -->
+            <a href="/category/berita">
+                Berita
+            </a>
 
-    <main class="container">
+            <a href="/category/transfer">
+                Transfer
+            </a>
 
-        <!-- PROFIL -->
+            <a href="/category/kompetisi">
+                Kompetisi
+            </a>
 
-        <section class="hero">
+            <a href="/category/komunitas">
+                Komunitas
+            </a>
 
-            <h1>
-                👤 Profil Pengguna
-            </h1>
+            <span>
+                👤 <%= user %>
+            </span>
 
-            <p>
-                Kelola akun World Football Forum kamu.
-            </p>
+            <a href="/logout">
+                Logout
+            </a>
 
-        </section>
-
-
-       <!-- INFORMASI AKUN -->
-<section class="hero">
-
-    <h2>Informasi Akun</h2>
-
-    <br>
-
-    <p>
-        <strong>Username:</strong>
-        <%= user %>
-    </p>
-
-</section>
-
-
-<!-- STATISTIK -->
-<section class="hero">
-
-    <h2>📊 Statistik</h2>
-
-    <div class="profile-stats">
-
-        <div class="profile-stat-card">
-
-            <div class="profile-stat-icon">
-                📝
-            </div>
-
-            <div class="profile-stat-number">
-                <%= threadCount %>
-            </div>
-
-            <div class="profile-stat-label">
-                Jumlah Thread
-            </div>
-
-        </div>
-
-
-        <div class="profile-stat-card">
-
-            <div class="profile-stat-icon">
-                💬
-            </div>
-
-            <div class="profile-stat-number">
-                <%= commentCount %>
-            </div>
-
-            <div class="profile-stat-label">
-                Jumlah Komentar
-            </div>
-
-        </div>
-
-
-        <div class="profile-stat-card">
-
-            <div class="profile-stat-icon">
-                👁️
-            </div>
-
-            <div class="profile-stat-number">
-                <%= totalViews %>
-            </div>
-
-            <div class="profile-stat-label">
-                Total Views
-            </div>
-
-        </div>
+        </nav>
 
     </div>
 
-</section>
+</header>
 
 
-<!-- THREAD SAYA -->
-<section class="hero">
+<!-- =====================================================
+     CONTENT
+     ===================================================== -->
 
-    <h2>📝 Thread Saya</h2>
+<main class="container">
 
-    <% if (myThreads.length === 0) { %>
 
-        <p style="margin-top: 20px;">
-            Kamu belum membuat thread.
+    <!-- =================================================
+         PROFIL
+         ================================================= -->
+
+    <section class="hero">
+
+        <h1>
+            👤 Profil Pengguna
+        </h1>
+
+        <p>
+            Kelola akun Forum Sahabat Bola kamu.
         </p>
 
-    <% } else { %>
+    </section>
 
-        <div class="profile-thread-list">
 
-            <% myThreads.forEach(thread => { %>
+    <!-- =================================================
+         INFORMASI AKUN
+         ================================================= -->
 
-                <div class="profile-thread-card">
+    <section class="hero">
 
-                    <h3>
-                        <a href="/thread/<%= thread.id %>">
-                            <%= thread.title %>
-                        </a>
-                    </h3>
+        <h2>
+            Informasi Akun
+        </h2>
 
-                    <div class="profile-thread-meta">
+        <br>
 
-                        📂 <%= thread.category %>
-                        &nbsp; | &nbsp;
+        <p>
+            <strong>Username:</strong>
+            <%= user %>
+        </p>
 
-                        📅 <%= thread.date %>
-                        &nbsp; | &nbsp;
+    </section>
 
-                        💬 <%= thread.comment_count %> komentar
-                        &nbsp; | &nbsp;
 
-                        👁️ <%= thread.views %> views
+    <!-- =================================================
+         EDIT PROFIL
+         ================================================= -->
 
-                    </div>
+    <section class="hero">
 
+        <h2>
+            ✏️ Edit Profil
+        </h2>
+
+        <br>
+
+        <form
+            action="/profile/edit"
+            method="POST"
+        >
+
+            <p>
+
+                <label for="username">
+                    Username Baru
+                </label>
+
+            </p>
+
+            <input
+                type="text"
+                id="username"
+                name="username"
+                value="<%= user %>"
+                minlength="3"
+                maxlength="100"
+                required
+                autocomplete="username"
+            >
+
+            <br>
+            <br>
+
+            <button type="submit">
+                💾 Simpan Perubahan
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- =================================================
+         STATISTIK
+         ================================================= -->
+
+    <section class="hero">
+
+        <h2>
+            📊 Statistik
+        </h2>
+
+        <br>
+
+        <div class="profile-stats">
+
+
+            <!-- JUMLAH THREAD -->
+
+            <div class="profile-stat-card">
+
+                <div class="profile-stat-icon">
+                    📝
                 </div>
 
-            <% }) %>
+                <div class="profile-stat-number">
+                    <%= threadCount %>
+                </div>
+
+                <div class="profile-stat-label">
+                    Jumlah Thread
+                </div>
+
+            </div>
+
+
+            <!-- JUMLAH KOMENTAR -->
+
+            <div class="profile-stat-card">
+
+                <div class="profile-stat-icon">
+                    💬
+                </div>
+
+                <div class="profile-stat-number">
+                    <%= commentCount %>
+                </div>
+
+                <div class="profile-stat-label">
+                    Jumlah Komentar
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL VIEWS -->
+
+            <div class="profile-stat-card">
+
+                <div class="profile-stat-icon">
+                    👁️
+                </div>
+
+                <div class="profile-stat-number">
+                    <%= totalViews %>
+                </div>
+
+                <div class="profile-stat-label">
+                    Total Views
+                </div>
+
+            </div>
+
 
         </div>
 
-    <% } %>
-
-</section>
+    </section>
 
 
-        <!-- GANTI PASSWORD -->
+    <!-- =================================================
+         THREAD SAYA
+         ================================================= -->
 
-        <section class="hero">
+    <section class="hero">
 
-            <h2>
-                🔐 Ganti Password
-            </h2>
+        <h2>
+            📝 Thread Saya
+        </h2>
 
-            <br>
+        <br>
 
-            <form
-                action="/profile/change-password"
-                method="POST"
+
+        <% if (myThreads.length === 0) { %>
+
+            <p style="margin-top: 20px;">
+                Kamu belum membuat thread.
+            </p>
+
+
+        <% } else { %>
+
+
+            <div class="profile-thread-list">
+
+
+                <% myThreads.forEach(thread => { %>
+
+
+                    <div class="profile-thread-card">
+
+
+                        <h3>
+
+                            <a
+                                href="/thread/<%= thread.id %>"
+                            >
+                                <%= thread.title %>
+                            </a>
+
+                        </h3>
+
+
+                        <div class="profile-thread-meta">
+
+                            📂 <%= thread.category %>
+
+                            &nbsp; | &nbsp;
+
+                            📅 <%= thread.date %>
+
+                            &nbsp; | &nbsp;
+
+                            💬 <%= thread.comment_count %>
+                            komentar
+
+                            &nbsp; | &nbsp;
+
+                            👁️ <%= thread.views %>
+                            views
+
+                        </div>
+
+
+                    </div>
+
+
+                <% }) %>
+
+
+            </div>
+
+
+        <% } %>
+
+
+    </section>
+
+
+    <!-- =================================================
+         GANTI PASSWORD
+         ================================================= -->
+
+    <section class="hero">
+
+        <h2>
+            🔐 Ganti Password
+        </h2>
+
+        <br>
+
+
+        <form
+            action="/profile/change-password"
+            method="POST"
+        >
+
+
+            <!-- PASSWORD LAMA -->
+
+            <p>
+
+                <label for="currentPassword">
+                    Password Lama
+                </label>
+
+            </p>
+
+            <input
+                type="password"
+                id="currentPassword"
+                name="currentPassword"
+                required
+                autocomplete="current-password"
             >
 
-                <p>
 
-                    <label for="currentPassword">
-                        Password Lama
-                    </label>
-
-                </p>
-
-                <input
-                    type="password"
-                    id="currentPassword"
-                    name="currentPassword"
-                    required
-                    autocomplete="current-password"
-                >
-
-                <br>
-                <br>
-
-                <p>
-
-                    <label for="newPassword">
-                        Password Baru
-                    </label>
-
-                </p>
-
-                <input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    minlength="6"
-                    maxlength="72"
-                    required
-                    autocomplete="new-password"
-                >
-
-                <br>
-                <br>
-
-                <p>
-
-                    <label for="confirmPassword">
-                        Konfirmasi Password Baru
-                    </label>
-
-                </p>
-
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    minlength="6"
-                    maxlength="72"
-                    required
-                    autocomplete="new-password"
-                >
-
-                <br>
-                <br>
-
-                <button type="submit">
-                    🔐 Ganti Password
-                </button>
-
-            </form>
-
-        </section>
-
-    </main>
+            <br>
+            <br>
 
 
-    <!-- FOOTER -->
+            <!-- PASSWORD BARU -->
 
-    <footer>
+            <p>
 
-        <p>
-            © 2026 World Football Forum
-        </p>
+                <label for="newPassword">
+                    Password Baru
+                </label>
 
-        <p>
-            Forum komunitas sepakbola dunia
-        </p>
+            </p>
 
-    </footer>
+            <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                minlength="6"
+                maxlength="72"
+                required
+                autocomplete="new-password"
+            >
+
+
+            <br>
+            <br>
+
+
+            <!-- KONFIRMASI PASSWORD -->
+
+            <p>
+
+                <label for="confirmPassword">
+                    Konfirmasi Password Baru
+                </label>
+
+            </p>
+
+            <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                minlength="6"
+                maxlength="72"
+                required
+                autocomplete="new-password"
+            >
+
+
+            <br>
+            <br>
+
+
+            <button type="submit">
+                🔐 Ganti Password
+            </button>
+
+
+        </form>
+
+    </section>
+
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer>
+
+    <p>
+        © 2026 Forum Sahabat Bola
+    </p>
+
+    <p>
+        Forum komunitas sepakbola dunia
+    </p>
+
+</footer>
+
 
 </body>
 

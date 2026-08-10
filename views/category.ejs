@@ -99,11 +99,30 @@
 
 <section class="hero">
 
-    <h1 class="category-title">
+    <%
+    const categoryNames = {
+        "berita": "Berita",
+        "transfer": "Transfer",
+        "kompetisi": "Kompetisi",
+        "komunitas": "Komunitas",
+        "premier-league": "Premier League",
+        "la-liga": "La Liga",
+        "serie-a": "Serie A",
+        "bundesliga": "Bundesliga",
+        "ligue-1": "Ligue 1",
+        "champions-league": "Champions League",
+        "world-cup": "World Cup"
+    };
 
-        ⚽ <%= category %>
+    const categoryDisplay =
+        categoryNames[category] || category;
+%>
 
-    </h1>
+<h1 class="category-title">
+
+    ⚽ <%= categoryDisplay %>
+
+</h1>
 
 
     <p>

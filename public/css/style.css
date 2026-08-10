@@ -1,14 +1,3 @@
-/* =========================================================
-   Forum Sahabat Bola
-   FINAL STYLE
-   THEME: MAROON + YELLOW + BLUE
-   ========================================================= */
-
-
-/* =========================================================
-   RESET
-   ========================================================= */
-
 * {
     box-sizing: border-box;
     margin: 0;
@@ -25,11 +14,6 @@ body {
     color: #1f2937;
     line-height: 1.6;
 }
-
-
-/* =========================================================
-   COLORS
-   ========================================================= */
 
 :root {
     --maroon: #7f1d2d;
@@ -50,11 +34,6 @@ body {
     --dark: #1f2937;
 }
 
-
-/* =========================================================
-   GENERAL
-   ========================================================= */
-
 a {
     color: var(--blue);
     text-decoration: none;
@@ -68,11 +47,6 @@ a:hover {
     width: min(1100px, 94%);
     margin: 0 auto;
 }
-
-
-/* =========================================================
-   HEADER
-   ========================================================= */
 
 header {
     background: var(--maroon);
@@ -89,11 +63,6 @@ header .container {
     gap: 25px;
 }
 
-
-/* =========================================================
-   LOGO
-   ========================================================= */
-
 .logo {
     color: white;
     font-size: 21px;
@@ -105,11 +74,6 @@ header .container {
 .logo span {
     color: var(--yellow);
 }
-
-
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
 
 nav {
     display: flex;
@@ -134,11 +98,6 @@ nav a:hover,
     color: var(--maroon);
     background: var(--yellow);
 }
-
-
-/* =========================================================
-   THREAD PAGE HEADER
-   ========================================================= */
 
 .header-inner {
     min-height: 76px;
@@ -174,20 +133,10 @@ nav a:hover,
     white-space: nowrap;
 }
 
-
-/* =========================================================
-   MAIN CONTENT
-   ========================================================= */
-
 main.container {
     padding-top: 28px;
     padding-bottom: 40px;
 }
-
-
-/* =========================================================
-   HERO
-   ========================================================= */
 
 .hero {
     background: white;
@@ -209,11 +158,6 @@ main.container {
     color: var(--gray);
     margin-top: 7px;
 }
-
-
-/* =========================================================
-   HOME HERO
-   ========================================================= */
 
 .home-hero {
     background:
@@ -261,11 +205,6 @@ main.container {
     color: #f8fafc;
 }
 
-
-/* =========================================================
-   BUTTON
-   ========================================================= */
-
 .home-create-button,
 .comment-button,
 .read-button,
@@ -291,11 +230,6 @@ button {
     transform: translateY(-1px);
 }
 
-
-/* =========================================================
-   SECTION TITLE
-   ========================================================= */
-
 .section-title {
     color: var(--maroon);
     font-size: 20px;
@@ -315,11 +249,6 @@ button {
     color: var(--gray);
     font-size: 13px;
 }
-
-
-/* =========================================================
-   CATEGORY GRID
-   ========================================================= */
 
 .categories {
     display: grid;
@@ -358,11 +287,6 @@ button {
     transform: translateY(-2px);
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.08);
 }
-
-
-/* =========================================================
-   HOME THREAD
-   ========================================================= */
 
 .home-thread {
     display: flex;
@@ -429,11 +353,6 @@ button {
     color: white;
 }
 
-
-/* =========================================================
-   EMPTY HOME
-   ========================================================= */
-
 .empty-home {
     text-align: center;
     background: white;
@@ -457,11 +376,6 @@ button {
     margin: 7px 0 18px;
 }
 
-
-/* =========================================================
-   CATEGORY PAGE
-   ========================================================= */
-
 .category-title {
     color: var(--maroon);
     font-size: 28px;
@@ -472,11 +386,6 @@ button {
     color: var(--gray);
     margin-bottom: 20px;
 }
-
-
-/* =========================================================
-   THREAD DETAIL
-   ========================================================= */
 
 .back-link {
     display: inline-block;
@@ -491,9 +400,6 @@ button {
 .back-link:hover {
     color: var(--maroon);
 }
-
-
-/* Main thread card */
 
 .thread-detail {
     background: white;
@@ -511,9 +417,6 @@ button {
         0 5px 18px rgba(0, 0, 0, 0.08);
 }
 
-
-/* Category label */
-
 .thread-category {
     display: inline-block;
 
@@ -530,9 +433,6 @@ button {
     margin-bottom: 14px;
 }
 
-
-/* Thread title */
-
 .thread-detail-title {
     color: var(--maroon);
 
@@ -543,9 +443,6 @@ button {
 
     word-break: break-word;
 }
-
-
-/* Thread meta */
 
 .thread-meta {
     display: flex;
@@ -599,10 +496,6 @@ button {
     margin-top: 20px;
 }
 
-/* =========================================================
-   COMMENTS
-   ========================================================= */
-
 .comments-section {
     margin-top: 10px;
 }
@@ -638,11 +531,6 @@ button {
     font-size: 12px;
     font-weight: 800;
 }
-
-
-/* =========================================================
-   COMMENT FORM
-   ========================================================= */
 
 .comment-form-card {
     background: white;
@@ -716,11 +604,6 @@ button {
     background: var(--blue-dark);
 }
 
-
-/* =========================================================
-   LOGIN COMMENT
-   ========================================================= */
-
 .login-comment-card {
     display: flex;
     align-items: center;
@@ -761,11 +644,6 @@ button {
     color: white;
 }
 
-
-/* =========================================================
-   EMPTY COMMENTS
-   ========================================================= */
-
 .empty-comments {
     text-align: center;
 
@@ -794,11 +672,6 @@ button {
     color: var(--gray);
     font-size: 14px;
 }
-
-
-/* =========================================================
-   COMMENT LIST
-   ========================================================= */
 
 .comment-list {
     display: flex;
@@ -900,12 +773,6 @@ button {
     color: white;
 }
 
-
-/* =========================================================
-   FORM PAGES
-   CREATE / LOGIN / REGISTER
-   ========================================================= */
-
 form {
     max-width: 100%;
 }
@@ -961,9 +828,6 @@ select {
     cursor: pointer;
 }
 
-
-/* Generic button */
-
 button {
     background: var(--blue);
     color: white;
@@ -976,11 +840,6 @@ button {
 button:hover {
     background: var(--blue-dark);
 }
-
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
 
 footer {
     background: var(--maroon);
@@ -1005,11 +864,6 @@ footer p:first-child {
     font-weight: 700;
     color: var(--yellow);
 }
-
-
-/* =========================================================
-   RESPONSIVE TABLET
-   ========================================================= */
 
 @media (max-width: 800px) {
 
@@ -1058,11 +912,6 @@ footer p:first-child {
         font-size: 26px;
     }
 }
-
-
-/* =========================================================
-   RESPONSIVE MOBILE
-   ========================================================= */
 
 @media (max-width: 550px) {
 
@@ -1152,9 +1001,6 @@ footer p:first-child {
 .login-form input {
     width: 100%;
 }
-/* =========================================================
-   LOGIN BOX
-   ========================================================= */
 
 .login-box {
     max-width: 420px;
@@ -1164,9 +1010,6 @@ footer p:first-child {
 .login-box input {
     width: 100%;
 }
-/* =========================================================
-   BREAKING NEWS
-========================================================= */
 
 .breaking-news-container {
     width: min(1100px, 94%);
@@ -1242,11 +1085,6 @@ footer p:first-child {
 
 }
 
-
-/* =========================================================
-   BANNER
-========================================================= */
-
 .banner-container {
     width: min(1100px, 94%);
     margin: 0 auto 5px;
@@ -1282,11 +1120,6 @@ footer p:first-child {
     object-fit: cover;
 }
 
-
-/* =========================================================
-   BANNER MOBILE
-========================================================= */
-
 @media (max-width: 700px) {
 
     .breaking-news-container {
@@ -1306,9 +1139,6 @@ footer p:first-child {
     }
 
 }
-/* =========================================================
-   BANNER PLACEHOLDER
-========================================================= */
 
 .banner-placeholder {
     flex: 1;
@@ -1357,9 +1187,6 @@ footer p:first-child {
     border-color: var(--maroon);
     transform: translateY(-1px);
 }
-/* =========================================================
-   PROFILE - STATISTICS
-   ========================================================= */
 
 .profile-stats {
     display: grid;
@@ -1394,11 +1221,6 @@ footer p:first-child {
     opacity: 0.75;
 }
 
-
-/* =========================================================
-   PROFILE - THREAD LIST
-   ========================================================= */
-
 .profile-thread-list {
     display: flex;
     flex-direction: column;
@@ -1428,11 +1250,6 @@ footer p:first-child {
     margin-top: 8px;
 }
 
-
-/* =========================================================
-   PROFILE - MOBILE
-   ========================================================= */
-
 @media (max-width: 700px) {
 
     .profile-stats {
@@ -1441,6 +1258,367 @@ footer p:first-child {
 
     .profile-stat-card {
         padding: 20px;
+    }
+
+}
+/* =========================================================
+   FORUM SAHABAT BOLA
+   ANIMATION SYSTEM
+   ========================================================= */
+
+
+/* =========================================================
+   ANIMATION LAYER
+   ========================================================= */
+
+#forum-animation-layer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+
+/* =========================================================
+   FLOATING FOOTBALL
+   ========================================================= */
+
+.floating-football {
+    position: absolute;
+    left: 8%;
+    top: 25%;
+
+    font-size: 42px;
+
+    opacity: 0.16;
+
+    animation:
+        floatingFootball 12s ease-in-out infinite;
+
+    filter:
+        drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
+}
+
+
+@keyframes floatingFootball {
+
+    0% {
+        transform:
+            translate(0, 0)
+            rotate(0deg);
+    }
+
+    25% {
+        transform:
+            translate(80px, -40px)
+            rotate(90deg);
+    }
+
+    50% {
+        transform:
+            translate(150px, 20px)
+            rotate(180deg);
+    }
+
+    75% {
+        transform:
+            translate(70px, 70px)
+            rotate(270deg);
+    }
+
+    100% {
+        transform:
+            translate(0, 0)
+            rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   PARTICLES
+   ========================================================= */
+
+.particle-container {
+    position: absolute;
+    inset: 0;
+}
+
+
+.forum-particle {
+    position: absolute;
+
+    width: 4px;
+    height: 4px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.75);
+
+    box-shadow:
+        0 0 8px rgba(255, 255, 255, 0.7);
+
+    animation:
+        particleFloat ease-in-out infinite;
+}
+
+
+@keyframes particleFloat {
+
+    0% {
+        opacity: 0;
+        transform:
+            translate(0, 0)
+            scale(0.5);
+    }
+
+    25% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+        transform:
+            translate(30px, -40px)
+            scale(1);
+    }
+
+    75% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(-20px, -80px)
+            scale(0.4);
+    }
+}
+
+
+/* =========================================================
+   LIGHT RAIN
+   ========================================================= */
+
+.rain-container {
+    position: absolute;
+    inset: 0;
+
+    overflow: hidden;
+
+    opacity: 0.18;
+}
+
+
+.rain-drop {
+    position: absolute;
+
+    top: -30px;
+
+    width: 1px;
+    height: 20px;
+
+    background:
+        linear-gradient(
+            transparent,
+            rgba(150, 190, 255, 0.65)
+        );
+
+    animation:
+        rainFall linear infinite;
+}
+
+
+@keyframes rainFall {
+
+    from {
+        transform:
+            translateY(-30px)
+            translateX(0);
+    }
+
+    to {
+        transform:
+            translateY(110vh)
+            translateX(-25px);
+    }
+}
+
+
+/* =========================================================
+   FIREWORKS
+   ========================================================= */
+
+.fireworks-container {
+    position: absolute;
+    inset: 0;
+}
+
+
+.firework {
+    position: absolute;
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow:
+        0 0 8px white,
+        15px 0 0 rgba(255, 220, 80, 0.8),
+        -15px 0 0 rgba(100, 170, 255, 0.8),
+        0 15px 0 rgba(255, 100, 100, 0.8),
+        0 -15px 0 rgba(255, 255, 255, 0.8);
+
+    animation:
+        fireworkExplosion 1.8s ease-out forwards;
+}
+
+
+@keyframes fireworkExplosion {
+
+    0% {
+        opacity: 1;
+        transform:
+            scale(0.2);
+    }
+
+    40% {
+        opacity: 1;
+        transform:
+            scale(1.8);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            scale(5);
+    }
+}
+
+
+/* =========================================================
+   PAGE LOADER
+   ========================================================= */
+
+#page-loader {
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        rgba(15, 10, 20, 0.96);
+
+    z-index: 99999;
+
+    opacity: 1;
+
+    transition:
+        opacity 0.3s ease;
+}
+
+
+#page-loader.loader-hidden {
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+
+.loader-content {
+    text-align: center;
+}
+
+
+.loader-ball {
+    font-size: 60px;
+
+    animation:
+        loaderBall 0.9s linear infinite;
+}
+
+
+@keyframes loaderBall {
+
+    from {
+        transform:
+            rotate(0deg);
+    }
+
+    to {
+        transform:
+            rotate(360deg);
+    }
+}
+
+
+.loader-title {
+    margin-top: 15px;
+
+    font-size: 20px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: #ffffff;
+}
+
+
+.loader-text {
+    margin-top: 8px;
+
+    font-size: 13px;
+
+    color: rgba(255, 255, 255, 0.65);
+}
+
+
+/* =========================================================
+   KEEP CONTENT ABOVE ANIMATIONS
+   ========================================================= */
+
+header,
+main,
+footer,
+.container,
+section,
+nav {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .floating-football {
+        font-size: 30px;
+    }
+
+    .forum-particle {
+        width: 3px;
+        height: 3px;
+    }
+
+    .loader-ball {
+        font-size: 48px;
+    }
+
+    .loader-title {
+        font-size: 16px;
     }
 
 }

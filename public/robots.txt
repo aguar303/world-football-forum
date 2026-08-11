@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://world-football-forum.onrender.com/sitemap.xml
